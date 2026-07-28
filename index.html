@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Infection - Zombie Survival</title>
+
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        margin: 0;
+        background: #111;
+        color: white;
+        font-family: Arial, sans-serif;
+        overflow: hidden;
+    }
+
+    #game {
+        display: block;
+        background: #202820;
+    }
+
+    #ui {
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 10;
+        background: rgba(0,0,0,.7);
+        padding: 12px 18px;
+        border-radius: 10px;
+        line-height: 1.6;
+    }
+
+    #message {
+        position: fixed;
+        inset: 0;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background: rgba(0,0,0,.8);
+        z-index: 20;
+        text-align: center;
+    }
+
+    #message h1 {
+        font-size: 60px;
+        margin: 0 0 20px;
+    }
+
+    button {
+        padding: 12px 25px;
+        font-size: 18px;
+        cursor: pointer;
+        border: none;
+        border-radius: 8px;
+    }
+</style>
+</head>
+
+<body>
+
+<canvas id="game"></canvas>
+
+<div id="ui">
+    <b>INFECTION</b><br>
+    Mode: <span id="mode">HUMAN</span><br>
+    Character: <span id="character">1</span><br>
+    Health: <span id="health">100</span><br>
+    Humans: <span id="humans">0</span><br>
+    Zombies: <span id="zombies">0</span><br>
+    <br>
+    WASD = Move<br>
+    Mouse = Aim<br>
+    Click = Attack<br>
+    TAB = Switch character
+</div>
+
+<div id="message">
+    <h1 id="result"></h1>
+    <button onclick="location.reload()">Play Again</button>
+</div>
+
+<script>
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+
+// ==============================
+// GAME STATE
+// ==============================
+
+let gameOver = false;
+
+let playerMode = "human";
+
+let controlledIndex = 0;
+
+let keys = {};
+
+let mouse = {
+    x: canvas.width / 2,
+    y: canvas.height / 2
+};
+
+let bullets = [];
+
+
+// ==============================
+// CHARACTERS
+// ==============================
+
+let humans = [
+    {
+        x: 200,
+        y: 250,
+        health: 100,
+        infected: false,
+        alive: true
+    },
+    {
+        x: 350,
+        y: 400,
+        health: 100,
+        infected: false,
+        alive: true
+    },
+    {
+        x: 600,
+        y: 250,
+        health: 100,
+        infected: false,
+        alive: true
+    },
+    {
+        x: 800,
+        y: 450,
+        health: 100,
+        infected: false,
+        alive: true
+    }
+];
+
+
+let zombies = [
+    {
+        x: 1000,
+        y: 250,
+        health: 100,
+        alive: true
+    },
+    {
+        x: 900,
+        y: 500,
+        health: 100,
+        alive: true
+    }
+];
+
+
+// ==============================
+// INPUT
+// ==============================
+
+document.addEventListener("keydown", e => {
+
+    keys[e.key.toLowerCase()] = true;
+
+    if (e.key === "Tab") {
+
+        e.preventDefault();
+
+        switchCharacter();
+    }
+
+});
+
+
+document.addEventListener("keyup", e => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+
+canvas.addEventListener("mousemove", e => {
+
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+
+});
+
+
+canvas.addEventListener("mousedown", () => {
+
+    shoot();
+
+});
+
+
+// ==============================
+// SWITCH CHARACTER
+// ==============================
+
+function switchCharacter() {
+
+    if (gameOver) return;
+
+    if (playerMode === "human") {
+
+        // Human can switch between alive humans
+
+        let aliveHumans =
+            humans.filter(h => h.alive && !h.infected);
+
+        if (aliveHumans.length <= 1) return;
+
+        controlledIndex++;
+
+        if (controlledIndex >= aliveHumans.length) {
+            controlledIndex = 0;
+        }
+
+    } else {
+
+        // Zombie can switch between zombies
+
+        let aliveZombies =
+            zombies.filter(z => z.alive);
+
+        if (aliveZombies.length <= 1) return;
+
+        controlledIndex++;
+
+        if (controlledIndex >= aliveZombies.length) {
+            controlledIndex = 0;
+        }
+
+    }
+
+}
+
+
+// ==============================
+// CURRENT PLAYER
+// ==============================
+
+function getPlayer() {
+
+    if (playerMode === "human") {
+
+        let aliveHumans =
+            humans.filter(h => h.alive && !h.infected);
+
+        return aliveHumans[controlledIndex];
+
+    } else {
+
+        let aliveZombies =
+            zombies.filter(z => z.alive);
+
+        return aliveZombies[controlledIndex];
+
+    }
+
+}
+
+
+// ==============================
+// SHOOT
+// ==============================
+
+function shoot() {
+
+    if (gameOver) return;
+
+    let player = getPlayer();
+
+    if (!player) return;
+
+
+    // Humans shoot bullets
+
+    if (playerMode === "human") {
+
+        let angle =
+            Math.atan2(
+                mouse.y - player.y,
+                mouse.x - player.x
+            );
+
+
+        bullets.push({
+
+            x: player.x,
+            y: player.y,
+
+            vx: Math.cos(angle) * 9,
+            vy: Math.sin(angle) * 9,
+
+            damage: 35
+
+        });
+
+    }
+
+}
+
+
+// ==============================
+// MOVEMENT
+// ==============================
+
+function movePlayer() {
+
+    let player = getPlayer();
+
+    if (!player) return;
+
+
+    let speed = playerMode === "human" ? 4 : 3.2;
+
+
+    if (keys["w"]) player.y -= speed;
+    if (keys["s"]) player.y += speed;
+    if (keys["a"]) player.x -= speed;
+    if (keys["d"]) player.x += speed;
+
+
+    player.x =
+        Math.max(20, Math.min(canvas.width - 20, player.x));
+
+    player.y =
+        Math.max(20, Math.min(canvas.height - 20, player.y));
+
+}
+
+
+// ==============================
+// ZOMBIE AI
+// ==============================
+
+function zombieAI() {
+
+    for (let zombie of zombies) {
+
+        if (!zombie.alive) continue;
+
+
+        // Don't control the currently selected zombie
+
+        if (
+            playerMode === "zombie" &&
+            zombie === getPlayer()
+        ) {
+            continue;
+        }
+
+
+        let targets = humans.filter(h =>
+            h.alive && !h.infected
+        );
+
+
+        if (targets.length === 0) continue;
+
+
+        let closest = targets[0];
+
+        let bestDistance = Infinity;
+
+
+        for (let human of targets) {
+
+            let dx = human.x - zombie.x;
+            let dy = human.y - zombie.y;
+
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+
+            if (distance < bestDistance) {
+
+                bestDistance = distance;
+                closest = human;
+
+            }
+
+        }
+
+
+        let dx = closest.x - zombie.x;
+        let dy = closest.y - zombie.y;
+
+        let distance =
+            Math.sqrt(dx * dx + dy * dy);
+
+
+        if (distance > 35) {
+
+            zombie.x +=
+                (dx / distance) * 1.4;
+
+            zombie.y +=
+                (dy / distance) * 1.4;
+
+        } else {
+
+            infectHuman(closest);
+
+        }
+
+    }
+
+}
+
+
+// ==============================
+// INFECTION
+// ==============================
+
+function infectHuman(human) {
+
+    if (human.infected || !human.alive) return;
+
+
+    human.infected = true;
+
+
+    // Turn human into zombie
+
+    zombies.push({
+
+        x: human.x,
+        y: human.y,
+
+        health: 100,
+
+        alive: true
+
+    });
+
+
+    human.alive = false;
+
+
+    // Automatically switch to zombie side
+
+    if (playerMode === "human") {
+
+        playerMode = "zombie";
+
+        controlledIndex = zombies.length - 1;
+
+    }
+
+}
+
+
+// ==============================
+// BULLETS
+// ==============================
+
+function updateBullets() {
+
+    for (let bullet of bullets) {
+
+        bullet.x += bullet.vx;
+        bullet.y += bullet.vy;
+
+
+        for (let zombie of zombies) {
+
+            if (!zombie.alive) continue;
+
+
+            let dx = bullet.x - zombie.x;
+            let dy = bullet.y - zombie.y;
+
+            let distance =
+                Math.sqrt(dx * dx + dy * dy);
+
+
+            if (distance < 18) {
+
+                zombie.health -= bullet.damage;
+
+                bullet.x = -100;
+
+                if (zombie.health <= 0) {
+
+                    zombie.alive = false;
+
+                }
+
+            }
+
+        }
+
+    }
+
+
+    bullets =
+        bullets.filter(b =>
+            b.x > 0 &&
+            b.x < canvas.width &&
+            b.y > 0 &&
+            b.y < canvas.height
+        );
+
+}
+
+
+// ==============================
+// ZOMBIE PLAYER ATTACK
+// ==============================
+
+function zombieAttack() {
+
+    if (playerMode !== "zombie") return;
+
+
+    let zombie = getPlayer();
+
+    if (!zombie) return;
+
+
+    for (let human of humans) {
+
+        if (!human.alive || human.infected)
+            continue;
+
+
+        let dx = human.x - zombie.x;
+        let dy = human.y - zombie.y;
+
+        let distance =
+            Math.sqrt(dx * dx + dy * dy);
+
+
+        if (distance < 40) {
+
+            infectHuman(human);
+
+        }
+
+    }
+
+}
+
+
+// ==============================
+// DRAW
+// ==============================
+
+function draw() {
+
+    ctx.clearRect(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+
+    // Ground grid
+
+    ctx.strokeStyle = "#293529";
+
+    for (let x = 0; x < canvas.width; x += 50) {
+
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+
+    }
+
+
+    for (let y = 0; y < canvas.height; y += 50) {
+
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+
+    }
+
+
+    // Humans
+
+    for (let human of humans) {
+
+        if (!human.alive) continue;
+
+        drawHuman(
+            human,
+            human === getPlayer()
+        );
+
+    }
+
+
+    // Zombies
+
+    for (let zombie of zombies) {
+
+        if (!zombie.alive) continue;
+
+        drawZombie(
+            zombie,
+            zombie === getPlayer()
+        );
+
+    }
+
+
+    // Bullets
+
+    ctx.fillStyle = "yellow";
+
+    for (let bullet of bullets) {
+
+        ctx.beginPath();
+
+        ctx.arc(
+            bullet.x,
+            bullet.y,
+            4,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+// ==============================
+// DRAW HUMAN
+// ==============================
+
+function drawHuman(human, selected) {
+
+    ctx.fillStyle = "white";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        human.x,
+        human.y,
+        16,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    // Selection ring
+
+    if (selected) {
+
+        ctx.strokeStyle = "cyan";
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            human.x,
+            human.y,
+            23,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+// ==============================
+// DRAW ZOMBIE
+// ==============================
+
+function drawZombie(zombie, selected) {
+
+    ctx.fillStyle = "limegreen";
+
+    ctx.beginPath();
+
+    ctx.arc(
+        zombie.x,
+        zombie.y,
+        17,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    if (selected) {
+
+        ctx.strokeStyle = "red";
+        ctx.lineWidth = 3;
+
+        ctx.beginPath();
+
+        ctx.arc(
+            zombie.x,
+            zombie.y,
+            24,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.stroke();
+
+    }
+
+}
+
+
+// ==============================
+// UI
+// ==============================
+
+function updateUI() {
+
+    let player = getPlayer();
+
+
+    document.getElementById("mode")
+        .textContent =
+        playerMode.toUpperCase();
+
+
+    document.getElementById("health")
+        .textContent =
+        player ? Math.max(0, Math.floor(player.health)) : 0;
+
+
+    document.getElementById("humans")
+        .textContent =
+        humans.filter(h =>
+            h.alive && !h.infected
+        ).length;
+
+
+    document.getElementById("zombies")
+        .textContent =
+        zombies.filter(z =>
+            z.alive
+        ).length;
+
+}
+
+
+// ==============================
+// WIN CONDITIONS
+// ==============================
+
+function checkWin() {
+
+    let aliveHumans =
+        humans.filter(h =>
+            h.alive && !h.infected
+        ).length;
+
+
+    let aliveZombies =
+        zombies.filter(z =>
+            z.alive
+        ).length;
+
+
+    if (aliveHumans === 0) {
+
+        endGame("🧟 ZOMBIES WIN!");
+
+    }
+
+
+    if (aliveZombies === 0) {
+
+        endGame("🧑 HUMANS WIN!");
+
+    }
+
+}
+
+
+function endGame(text) {
+
+    if (gameOver) return;
+
+    gameOver = true;
+
+    document.getElementById("result")
+        .textContent = text;
+
+    document.getElementById("message")
+        .style.display = "flex";
+
+}
+
+
+// ==============================
+// GAME LOOP
+// ==============================
+
+function gameLoop() {
+
+    if (!gameOver) {
+
+        movePlayer();
+
+        zombieAI();
+
+        zombieAttack();
+
+        updateBullets();
+
+        checkWin();
+
+        updateUI();
+
+        draw();
+
+    }
+
+
+    requestAnimationFrame(gameLoop);
+
+}
+
+
+gameLoop();
+
+</script>
+
+</body>
+</html>
