@@ -1,7 +1,6 @@
 // ============================================================
 // INFECTION
-// Zombie Survival
-// Character Switching + Horde System
+// BUILDINGS + CHARACTER FACES + ZOMBIE DESIGNS
 // ============================================================
 
 const canvas = document.getElementById("game");
@@ -31,17 +30,26 @@ const WORLD_HEIGHT = 2600;
 
 
 // ============================================================
-// SETTINGS
+// WAVE SETTINGS
 // ============================================================
 
-const HUMAN_SPEED = 250;
-const ZOMBIE_SPEED = 150;
+const FIRST_WAVE_ZOMBIES = 18;
+const WAVE_INCREMENT = 8;
+const TOTAL_WAVES = 5;
+
+let currentWave = 1;
+let waveActive = false;
+let waveTimer = 2000;
+
+
+// ============================================================
+// COMBAT
+// ============================================================
 
 const BULLET_SPEED = 950;
 
-const ZOMBIE_ATTACK_DISTANCE = 48;
-
-const ZOMBIE_ATTACK_COOLDOWN = 700;
+const ZOMBIE_ATTACK_DISTANCE = 50;
+const ZOMBIE_ATTACK_COOLDOWN = 650;
 
 
 // ============================================================
@@ -63,8 +71,8 @@ let particles = [];
 let keys = {};
 
 let mouse = {
-    x: canvas.width / 2,
-    y: canvas.height / 2,
+    x: 0,
+    y: 0,
     down: false
 };
 
@@ -75,11 +83,13 @@ let camera = {
 
 
 // ============================================================
-// CHARACTER LISTS
+// ARRAYS
 // ============================================================
 
 const humans = [];
 const zombies = [];
+const buildings = [];
+const cars = [];
 
 
 // ============================================================
@@ -92,8 +102,11 @@ const survivorData = [
         name: "Alex",
         health: 120,
         speed: 270,
-        damage: 40,
-        fireRate: 220
+        damage: 45,
+        fireRate: 650,
+        skin: "#d69b72",
+        hair: "#25180f",
+        shirt: "#3f79b5"
     },
 
     {
@@ -101,15 +114,21 @@ const survivorData = [
         health: 90,
         speed: 320,
         damage: 30,
-        fireRate: 150
+        fireRate: 450,
+        skin: "#f0bd91",
+        hair: "#5a321d",
+        shirt: "#a94d72"
     },
 
     {
         name: "Jack",
         health: 150,
         speed: 210,
-        damage: 55,
-        fireRate: 300
+        damage: 70,
+        fireRate: 850,
+        skin: "#bd805a",
+        hair: "#151515",
+        shirt: "#5b5b5b"
     },
 
     {
@@ -117,7 +136,10 @@ const survivorData = [
         health: 100,
         speed: 250,
         damage: 45,
-        fireRate: 220
+        fireRate: 650,
+        skin: "#f1c39d",
+        hair: "#d39a4e",
+        shirt: "#648c54"
     },
 
     {
@@ -125,15 +147,21 @@ const survivorData = [
         health: 110,
         speed: 290,
         damage: 35,
-        fireRate: 180
+        fireRate: 500,
+        skin: "#d59a73",
+        hair: "#3a2418",
+        shirt: "#a56c43"
     },
 
     {
         name: "Noah",
         health: 180,
         speed: 190,
-        damage: 70,
-        fireRate: 350
+        damage: 85,
+        fireRate: 1000,
+        skin: "#8e5c42",
+        hair: "#17120f",
+        shirt: "#4d536c"
     },
 
     {
@@ -141,7 +169,10 @@ const survivorData = [
         health: 85,
         speed: 340,
         damage: 25,
-        fireRate: 120
+        fireRate: 400,
+        skin: "#edb98d",
+        hair: "#342014",
+        shirt: "#bd5d52"
     },
 
     {
@@ -149,7 +180,10 @@ const survivorData = [
         health: 130,
         speed: 240,
         damage: 50,
-        fireRate: 240
+        fireRate: 700,
+        skin: "#c88963",
+        hair: "#20140e",
+        shirt: "#4e8d7c"
     },
 
     {
@@ -157,18 +191,203 @@ const survivorData = [
         health: 100,
         speed: 280,
         damage: 40,
-        fireRate: 200
+        fireRate: 550,
+        skin: "#f0c49d",
+        hair: "#6e421e",
+        shirt: "#765ca8"
     },
 
     {
         name: "Daniel",
         health: 160,
         speed: 220,
-        damage: 60,
-        fireRate: 280
+        damage: 65,
+        fireRate: 800,
+        skin: "#a86f50",
+        hair: "#21160f",
+        shirt: "#47715f"
     }
 
 ];
+
+
+// ============================================================
+// BUILDINGS
+// ============================================================
+
+function createBuilding(
+    x,
+    y,
+    width,
+    height,
+    type,
+    name
+) {
+
+    buildings.push({
+
+        x,
+        y,
+        width,
+        height,
+        type,
+        name
+
+    });
+
+}
+
+
+// ============================================================
+// CREATE CITY
+// ============================================================
+
+function createCity() {
+
+    buildings.length = 0;
+    cars.length = 0;
+
+
+    // Houses
+
+    createBuilding(
+        300,
+        250,
+        420,
+        300,
+        "house",
+        "Safe House"
+    );
+
+
+    createBuilding(
+        950,
+        250,
+        450,
+        320,
+        "house",
+        "Family House"
+    );
+
+
+    createBuilding(
+        1700,
+        300,
+        500,
+        350,
+        "shop",
+        "Supermarket"
+    );
+
+
+    createBuilding(
+        2700,
+        250,
+        500,
+        300,
+        "hospital",
+        "Hospital"
+    );
+
+
+    createBuilding(
+        350,
+        1100,
+        500,
+        350,
+        "house",
+        "Apartment"
+    );
+
+
+    createBuilding(
+        1200,
+        1200,
+        600,
+        400,
+        "police",
+        "Police Station"
+    );
+
+
+    createBuilding(
+        2200,
+        1100,
+        550,
+        350,
+        "shop",
+        "Grocery Store"
+    );
+
+
+    createBuilding(
+        3100,
+        1200,
+        550,
+        400,
+        "house",
+        "Large House"
+    );
+
+
+    createBuilding(
+        500,
+        1900,
+        600,
+        350,
+        "house",
+        "Warehouse"
+    );
+
+
+    createBuilding(
+        1600,
+        1950,
+        600,
+        350,
+        "shop",
+        "Mall"
+    );
+
+
+    createBuilding(
+        2800,
+        1900,
+        600,
+        350,
+        "hospital",
+        "Clinic"
+    );
+
+
+    // Cars
+
+    createCar(850, 850, 80, 40);
+    createCar(1500, 800, 80, 40);
+    createCar(2350, 800, 80, 40);
+    createCar(2900, 900, 80, 40);
+    createCar(1150, 1750, 80, 40);
+    createCar(2500, 1750, 80, 40);
+    createCar(3500, 1750, 80, 40);
+
+}
+
+
+function createCar(
+    x,
+    y,
+    width,
+    height
+) {
+
+    cars.push({
+        x,
+        y,
+        width,
+        height
+    });
+
+}
 
 
 // ============================================================
@@ -185,9 +404,8 @@ function createHuman(x, y, data) {
 
         name: data.name,
 
-        x: x,
-
-        y: y,
+        x,
+        y,
 
         radius: 18,
 
@@ -200,6 +418,12 @@ function createHuman(x, y, data) {
         damage: data.damage,
 
         fireRate: data.fireRate,
+
+        skin: data.skin,
+
+        hair: data.hair,
+
+        shirt: data.shirt,
 
         alive: true,
 
@@ -214,6 +438,7 @@ function createHuman(x, y, data) {
     humans.push(human);
 
     return human;
+
 }
 
 
@@ -229,22 +454,18 @@ function createZombie(
 ) {
 
     let health = 100;
-    let speed = ZOMBIE_SPEED;
+    let speed = 150;
     let radius = 20;
 
 
-    // FAST ZOMBIE
-
     if (zombieType === "fast") {
 
-        health = 65;
+        health = 70;
         speed = 260;
         radius = 16;
 
     }
 
-
-    // TANK ZOMBIE
 
     if (zombieType === "tank") {
 
@@ -261,70 +482,70 @@ function createZombie(
 
         type: "zombie",
 
-        name: name,
+        name,
 
-        zombieType: zombieType,
+        zombieType,
 
-        x: x,
+        x,
+        y,
 
-        y: y,
+        radius,
 
-        radius: radius,
-
-        health: health,
+        health,
 
         maxHealth: health,
 
-        speed: speed,
+        speed,
 
         alive: true,
 
         ai: true,
 
-        lastAttack: 0
+        lastAttack: 0,
+
+        skin:
+            zombieType === "tank"
+                ? "#687b55"
+                : zombieType === "fast"
+                    ? "#78925d"
+                    : "#657d5c"
 
     };
 
     zombies.push(zombie);
 
     return zombie;
+
 }
 
 
 // ============================================================
-// INITIAL GAME
+// INITIAL HUMANS
 // ============================================================
 
-function createInitialGame() {
-
-    humans.length = 0;
-    zombies.length = 0;
-
-    bullets.length = 0;
-    particles.length = 0;
-
-
-    // --------------------------------------------------------
-    // SURVIVORS
-    // --------------------------------------------------------
+function createInitialHumans() {
 
     const positions = [
 
-        [600, 600],
-        [750, 520],
-        [850, 700],
-        [650, 800],
-        [950, 850],
-        [1100, 650],
-        [1050, 900],
-        [800, 1000],
-        [1200, 800],
-        [500, 900]
+        [600, 700],
+        [750, 650],
+        [850, 750],
+        [650, 850],
+        [950, 900],
+        [1100, 700],
+        [1050, 950],
+        [800, 1050],
+        [1200, 900],
+        [500, 950]
 
     ];
 
 
-    for (let i = 0; i < survivorData.length; i++) {
+    for (
+        let i = 0;
+        i < survivorData.length;
+        i++
+    ) {
 
         createHuman(
             positions[i][0],
@@ -335,348 +556,359 @@ function createInitialGame() {
     }
 
 
-    // --------------------------------------------------------
-    // ZOMBIE HORDE
-    // --------------------------------------------------------
-
-    // Normal zombies
-
-    for (let i = 0; i < 12; i++) {
-
-        createZombie(
-
-            2500 + Math.random() * 1000,
-
-            500 + Math.random() * 1500,
-
-            "Walker",
-
-            "normal"
-
-        );
-
-    }
-
-
-    // Fast zombies
-
-    for (let i = 0; i < 4; i++) {
-
-        createZombie(
-
-            2200 + Math.random() * 1200,
-
-            500 + Math.random() * 1500,
-
-            "Runner",
-
-            "fast"
-
-        );
-
-    }
-
-
-    // Tank zombies
-
-    for (let i = 0; i < 2; i++) {
-
-        createZombie(
-
-            3000 + Math.random() * 700,
-
-            700 + Math.random() * 1000,
-
-            "Tank",
-
-            "tank"
-
-        );
-
-    }
-
-
-    // Player
-
     currentTeam = "human";
 
-    currentCharacterId = humans[0].id;
+    currentCharacterId =
+        humans[0].id;
 
     humans[0].ai = false;
 
 }
 
-createInitialGame();
+
+// ============================================================
+// WAVE COUNT
+// ============================================================
+
+function getWaveZombieCount(wave) {
+
+    return (
+        FIRST_WAVE_ZOMBIES +
+        (wave - 1) *
+        WAVE_INCREMENT
+    );
+
+}
 
 
 // ============================================================
-// INPUT
+// SPAWN WAVE
 // ============================================================
 
-window.addEventListener("keydown", event => {
+function spawnWave() {
 
-    keys[event.key.toLowerCase()] = true;
+    if (gameOver)
+        return;
 
 
-    if (event.key === "Tab") {
+    const count =
+        getWaveZombieCount(
+            currentWave
+        );
 
-        event.preventDefault();
 
-        switchCharacter();
+    waveActive = true;
+
+
+    showWaveMessage(
+        `WAVE ${currentWave}`,
+        `${count} ZOMBIES ARE COMING`
+    );
+
+
+    for (
+        let i = 0;
+        i < count;
+        i++
+    ) {
+
+        setTimeout(
+            spawnSingleZombie,
+            i * 180
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// SPAWN ZOMBIE
+// ============================================================
+
+function spawnSingleZombie() {
+
+    if (gameOver)
+        return;
+
+
+    let x;
+    let y;
+
+
+    const side =
+        Math.floor(
+            Math.random() * 4
+        );
+
+
+    if (side === 0) {
+
+        x =
+            Math.random() *
+            WORLD_WIDTH;
+
+        y = 80;
+
+    }
+
+    else if (side === 1) {
+
+        x =
+            WORLD_WIDTH - 80;
+
+        y =
+            Math.random() *
+            WORLD_HEIGHT;
+
+    }
+
+    else if (side === 2) {
+
+        x =
+            Math.random() *
+            WORLD_WIDTH;
+
+        y =
+            WORLD_HEIGHT - 80;
+
+    }
+
+    else {
+
+        x = 80;
+
+        y =
+            Math.random() *
+            WORLD_HEIGHT;
+
+    }
+
+
+    let type = "normal";
+
+    const roll =
+        Math.random();
+
+
+    if (
+        currentWave >= 2 &&
+        roll < 0.20
+    ) {
+
+        type = "fast";
 
     }
 
 
     if (
-        event.key.toLowerCase() === "r" &&
-        gameOver
+        currentWave >= 3 &&
+        roll < 0.08
     ) {
 
-        location.reload();
-
-    }
-
-});
-
-
-window.addEventListener("keyup", event => {
-
-    keys[event.key.toLowerCase()] = false;
-
-});
-
-
-canvas.addEventListener("mousemove", event => {
-
-    mouse.x = event.clientX;
-    mouse.y = event.clientY;
-
-});
-
-
-canvas.addEventListener("mousedown", event => {
-
-    if (event.button === 0) {
-
-        mouse.down = true;
-
-    }
-
-});
-
-
-canvas.addEventListener("mouseup", event => {
-
-    if (event.button === 0) {
-
-        mouse.down = false;
-
-    }
-
-});
-
-
-canvas.addEventListener("contextmenu", event => {
-
-    event.preventDefault();
-
-});
-
-
-// ============================================================
-// CURRENT CHARACTER
-// ============================================================
-
-function getCurrentCharacter() {
-
-    if (currentTeam === "human") {
-
-        return humans.find(
-            h =>
-                h.id === currentCharacterId &&
-                h.alive &&
-                !h.infected
-        );
+        type = "tank";
 
     }
 
 
-    return zombies.find(
-        z =>
-            z.id === currentCharacterId &&
-            z.alive
+    createZombie(
+        x,
+        y,
+        type === "tank"
+            ? "Tank"
+            : type === "fast"
+                ? "Runner"
+                : "Walker",
+        type
     );
 
 }
 
 
 // ============================================================
-// AVAILABLE CHARACTERS
+// WAVE UPDATE
 // ============================================================
 
-function getAvailableCharacters() {
+function updateWaveTimer(dt) {
 
-    if (currentTeam === "human") {
+    if (waveActive)
+        return;
 
-        return humans.filter(
-            h =>
-                h.alive &&
-                !h.infected
-        );
-
-    }
-
-
-    return zombies.filter(
-        z =>
-            z.alive
-    );
-
-}
-
-
-// ============================================================
-// CHARACTER SWITCHING
-// ============================================================
-
-function switchCharacter() {
-
-    if (gameOver) return;
-
-
-    const available =
-        getAvailableCharacters();
-
-
-    if (available.length <= 1) return;
-
-
-    let index =
-        available.findIndex(
-            c =>
-                c.id === currentCharacterId
-        );
-
-
-    if (index >= 0) {
-
-        available[index].ai = true;
-
-    }
-
-
-    index++;
-
-
-    if (index >= available.length) {
-
-        index = 0;
-
-    }
-
-
-    const next =
-        available[index];
-
-
-    currentCharacterId =
-        next.id;
-
-    next.ai = false;
-
-
-    createSwitchEffect(
-        next.x,
-        next.y
-    );
-
-}
-
-
-// ============================================================
-// INFECTION
-// ============================================================
-
-function becomeZombie(human) {
-
-    if (!human.alive) return;
-
-
-    human.alive = false;
-
-    human.infected = true;
-
-
-    const zombie =
-        createZombie(
-
-            human.x,
-            human.y,
-
-            human.name + " - INFECTED",
-
-            "normal"
-
-        );
-
-
-    // Player gets transformed
 
     if (
-        human.id ===
-        currentCharacterId
+        currentWave >
+        TOTAL_WAVES
+    )
+        return;
+
+
+    waveTimer -=
+        dt * 1000;
+
+
+    if (
+        waveTimer <= 0
     ) {
 
-        currentTeam = "zombie";
-
-        currentCharacterId =
-            zombie.id;
-
-        zombie.ai = false;
-
-        showInfectionMessage();
+        spawnWave();
 
     }
 
+}
 
-    createBloodEffect(
-        human.x,
-        human.y,
-        "#78ff65"
+
+function checkWaveFinished() {
+
+    if (!waveActive)
+        return;
+
+
+    const living =
+        zombies.filter(
+            z =>
+                z.alive
+        );
+
+
+    if (
+        living.length === 0
+    ) {
+
+        waveActive = false;
+
+
+        if (
+            currentWave >=
+            TOTAL_WAVES
+        ) {
+
+            endGame(
+                "🧑 HUMANS SURVIVED ALL WAVES!"
+            );
+
+            return;
+
+        }
+
+
+        currentWave++;
+
+        waveTimer = 3500;
+
+    }
+
+}
+
+
+// ============================================================
+// COLLISION WITH BUILDINGS
+// ============================================================
+
+function circleRectangleCollision(
+    circle,
+    rect
+) {
+
+    const closestX =
+        Math.max(
+            rect.x,
+            Math.min(
+                circle.x,
+                rect.x +
+                rect.width
+            )
+        );
+
+
+    const closestY =
+        Math.max(
+            rect.y,
+            Math.min(
+                circle.y,
+                rect.y +
+                rect.height
+            )
+        );
+
+
+    const dx =
+        circle.x -
+        closestX;
+
+
+    const dy =
+        circle.y -
+        closestY;
+
+
+    return (
+        dx * dx +
+        dy * dy <
+        circle.radius *
+        circle.radius
     );
 
 }
 
 
 // ============================================================
-// INFECTION MESSAGE
+// MOVEMENT COLLISION
 // ============================================================
 
-function showInfectionMessage() {
+function moveCharacter(
+    character,
+    dx,
+    dy
+) {
 
-    const warning =
-        document.getElementById(
-            "infectionWarning"
-        );
+    const oldX =
+        character.x;
 
-
-    if (!warning) return;
-
-
-    warning.textContent =
-        "YOU ARE INFECTED";
+    const oldY =
+        character.y;
 
 
-    warning.style.display =
-        "block";
+    character.x += dx;
 
 
-    setTimeout(() => {
+    if (
+        buildings.some(
+            building =>
+                circleRectangleCollision(
+                    character,
+                    building
+                )
+        )
+    ) {
 
-        warning.style.display =
-            "none";
+        character.x =
+            oldX;
 
-    }, 1800);
+    }
+
+
+    character.y += dy;
+
+
+    if (
+        buildings.some(
+            building =>
+                circleRectangleCollision(
+                    character,
+                    building
+                )
+        )
+    ) {
+
+        character.y =
+            oldY;
+
+    }
+
+
+    keepInsideWorld(
+        character
+    );
 
 }
 
@@ -691,7 +923,8 @@ function updatePlayer(dt) {
         getCurrentCharacter();
 
 
-    if (!player) return;
+    if (!player)
+        return;
 
 
     let dx = 0;
@@ -701,44 +934,35 @@ function updatePlayer(dt) {
     if (
         keys["w"] ||
         keys["arrowup"]
-    ) {
-
+    )
         dy--;
-
-    }
 
 
     if (
         keys["s"] ||
         keys["arrowdown"]
-    ) {
-
+    )
         dy++;
-
-    }
 
 
     if (
         keys["a"] ||
         keys["arrowleft"]
-    ) {
-
+    )
         dx--;
-
-    }
 
 
     if (
         keys["d"] ||
         keys["arrowright"]
-    ) {
-
+    )
         dx++;
 
-    }
 
-
-    if (dx !== 0 || dy !== 0) {
+    if (
+        dx !== 0 ||
+        dy !== 0
+    ) {
 
         const length =
             Math.sqrt(
@@ -746,25 +970,23 @@ function updatePlayer(dt) {
                 dy * dy
             );
 
+
         dx /= length;
         dy /= length;
 
     }
 
 
-    player.x +=
+    moveCharacter(
+        player,
         dx *
         player.speed *
-        dt;
+        dt,
 
-
-    player.y +=
         dy *
         player.speed *
-        dt;
-
-
-    keepInsideWorld(player);
+        dt
+    );
 
 }
 
@@ -775,20 +997,28 @@ function updatePlayer(dt) {
 
 function updateHumanAI(dt) {
 
-    for (const human of humans) {
+    for (
+        const human of humans
+    ) {
 
-        if (!human.alive) continue;
+        if (!human.alive)
+            continue;
 
-        if (human.infected) continue;
+        if (human.infected)
+            continue;
 
-        if (!human.ai) continue;
+        if (!human.ai)
+            continue;
 
 
         const zombie =
-            findNearestZombie(human);
+            findNearestZombie(
+                human
+            );
 
 
-        if (!zombie) continue;
+        if (!zombie)
+            continue;
 
 
         const distance =
@@ -798,9 +1028,9 @@ function updateHumanAI(dt) {
             );
 
 
-        // RUN AWAY
-
-        if (distance < 500) {
+        if (
+            distance < 350
+        ) {
 
             const dx =
                 human.x -
@@ -810,6 +1040,7 @@ function updateHumanAI(dt) {
                 human.y -
                 zombie.y;
 
+
             const length =
                 Math.sqrt(
                     dx * dx +
@@ -817,35 +1048,38 @@ function updateHumanAI(dt) {
                 );
 
 
-            if (length > 0) {
+            if (
+                length > 0
+            ) {
 
-                human.x +=
+                moveCharacter(
+                    human,
+
                     dx / length *
                     human.speed *
-                    0.5 *
-                    dt;
+                    0.35 *
+                    dt,
 
-                human.y +=
                     dy / length *
                     human.speed *
-                    0.5 *
-                    dt;
+                    0.35 *
+                    dt
+                );
 
             }
 
         }
 
 
-        // SHOOT
+        if (
+            distance < 600
+        ) {
 
-        if (distance < 800) {
-
-            humanShoot(human);
+            humanShoot(
+                human
+            );
 
         }
-
-
-        keepInsideWorld(human);
 
     }
 
@@ -858,18 +1092,25 @@ function updateHumanAI(dt) {
 
 function updateZombieAI(dt) {
 
-    for (const zombie of zombies) {
+    for (
+        const zombie of zombies
+    ) {
 
-        if (!zombie.alive) continue;
+        if (!zombie.alive)
+            continue;
 
-        if (!zombie.ai) continue;
+        if (!zombie.ai)
+            continue;
 
 
         const human =
-            findNearestHuman(zombie);
+            findNearestHuman(
+                zombie
+            );
 
 
-        if (!human) continue;
+        if (!human)
+            continue;
 
 
         const dx =
@@ -893,21 +1134,26 @@ function updateZombieAI(dt) {
             ZOMBIE_ATTACK_DISTANCE
         ) {
 
-            if (distance > 0) {
+            if (
+                distance > 0
+            ) {
 
-                zombie.x +=
+                moveCharacter(
+                    zombie,
+
                     dx / distance *
                     zombie.speed *
-                    dt;
+                    dt,
 
-                zombie.y +=
                     dy / distance *
                     zombie.speed *
-                    dt;
+                    dt
+                );
 
             }
 
-        } else {
+        }
+        else {
 
             zombieAttack(
                 zombie,
@@ -916,21 +1162,21 @@ function updateZombieAI(dt) {
 
         }
 
-
-        keepInsideWorld(zombie);
-
     }
 
 }
 
 
 // ============================================================
-// ZOMBIE PLAYER ATTACK
+// PLAYER ZOMBIE ATTACK
 // ============================================================
 
 function updateZombiePlayer() {
 
-    if (currentTeam !== "zombie")
+    if (
+        currentTeam !==
+        "zombie"
+    )
         return;
 
 
@@ -938,14 +1184,18 @@ function updateZombiePlayer() {
         getCurrentCharacter();
 
 
-    if (!zombie) return;
+    if (!zombie)
+        return;
 
 
     const human =
-        findNearestHuman(zombie);
+        findNearestHuman(
+            zombie
+        );
 
 
-    if (!human) return;
+    if (!human)
+        return;
 
 
     if (
@@ -975,7 +1225,8 @@ function zombieAttack(
     human
 ) {
 
-    if (!human.alive) return;
+    if (!human.alive)
+        return;
 
 
     const now =
@@ -986,40 +1237,29 @@ function zombieAttack(
         now -
         zombie.lastAttack <
         ZOMBIE_ATTACK_COOLDOWN
-    ) {
-
+    )
         return;
-
-    }
 
 
     zombie.lastAttack =
         now;
 
 
-    // Stronger zombies have better infection chance
-
-    let chance = 0.4;
+    let chance = 0.45;
 
 
     if (
         zombie.zombieType ===
         "fast"
-    ) {
-
+    )
         chance = 0.55;
-
-    }
 
 
     if (
         zombie.zombieType ===
         "tank"
-    ) {
-
-        chance = 0.7;
-
-    }
+    )
+        chance = 0.70;
 
 
     if (
@@ -1027,11 +1267,15 @@ function zombieAttack(
         chance
     ) {
 
-        becomeZombie(human);
+        becomeZombie(
+            human
+        );
 
-    } else {
+    }
+    else {
 
-        human.health -= 25;
+        human.health -=
+            30;
 
 
         createBloodEffect(
@@ -1045,11 +1289,66 @@ function zombieAttack(
             human.health <= 0
         ) {
 
-            becomeZombie(human);
+            becomeZombie(
+                human
+            );
 
         }
 
     }
+
+}
+
+
+// ============================================================
+// INFECTION
+// ============================================================
+
+function becomeZombie(
+    human
+) {
+
+    if (!human.alive)
+        return;
+
+
+    human.alive = false;
+    human.infected = true;
+
+
+    const zombie =
+        createZombie(
+            human.x,
+            human.y,
+            human.name +
+            " - INFECTED",
+            "normal"
+        );
+
+
+    if (
+        human.id ===
+        currentCharacterId
+    ) {
+
+        currentTeam =
+            "zombie";
+
+        currentCharacterId =
+            zombie.id;
+
+        zombie.ai = false;
+
+        showInfectionMessage();
+
+    }
+
+
+    createBloodEffect(
+        human.x,
+        human.y,
+        "#65ff72"
+    );
 
 }
 
@@ -1063,7 +1362,8 @@ function updatePlayerShooting() {
     if (
         currentTeam !==
         "human"
-    ) return;
+    )
+        return;
 
 
     if (!mouse.down)
@@ -1074,19 +1374,20 @@ function updatePlayerShooting() {
         getCurrentCharacter();
 
 
-    if (!player) return;
+    if (!player)
+        return;
 
 
-    humanShoot(player);
+    humanShoot(
+        player
+    );
 
 }
 
 
-// ============================================================
-// HUMAN SHOOT
-// ============================================================
-
-function humanShoot(human) {
+function humanShoot(
+    human
+) {
 
     const now =
         Date.now();
@@ -1096,11 +1397,8 @@ function humanShoot(human) {
         now -
         human.lastAttack <
         human.fireRate
-    ) {
-
+    )
         return;
-
-    }
 
 
     human.lastAttack =
@@ -1127,7 +1425,6 @@ function humanShoot(human) {
     bullets.push({
 
         x: human.x,
-
         y: human.y,
 
         vx:
@@ -1154,7 +1451,9 @@ function humanShoot(human) {
 
 function updateBullets(dt) {
 
-    for (const bullet of bullets) {
+    for (
+        const bullet of bullets
+    ) {
 
         bullet.x +=
             bullet.vx *
@@ -1168,7 +1467,29 @@ function updateBullets(dt) {
             dt;
 
 
-        for (const zombie of zombies) {
+        // Buildings block bullets
+
+        if (
+            buildings.some(
+                building =>
+                    pointInsideRectangle(
+                        bullet.x,
+                        bullet.y,
+                        building
+                    )
+            )
+        ) {
+
+            bullet.life = 0;
+
+            continue;
+
+        }
+
+
+        for (
+            const zombie of zombies
+        ) {
 
             if (!zombie.alive)
                 continue;
@@ -1219,9 +1540,29 @@ function updateBullets(dt) {
 
     bullets =
         bullets.filter(
-            b =>
-                b.life > 0
+            bullet =>
+                bullet.life > 0
         );
+
+}
+
+
+function pointInsideRectangle(
+    x,
+    y,
+    rect
+) {
+
+    return (
+        x >= rect.x &&
+        x <=
+            rect.x +
+            rect.width &&
+        y >= rect.y &&
+        y <=
+            rect.y +
+            rect.height
+    );
 
 }
 
@@ -1230,7 +1571,9 @@ function updateBullets(dt) {
 // KILL ZOMBIE
 // ============================================================
 
-function killZombie(zombie) {
+function killZombie(
+    zombie
+) {
 
     zombie.alive = false;
 
@@ -1249,23 +1592,140 @@ function killZombie(zombie) {
         "zombie"
     ) {
 
-        const remaining =
+        const available =
             getAvailableCharacters();
 
 
         if (
-            remaining.length > 0
+            available.length > 0
         ) {
 
             currentCharacterId =
-                remaining[0].id;
+                available[0].id;
 
-            remaining[0].ai =
+            available[0].ai =
                 false;
 
         }
 
     }
+
+}
+
+
+// ============================================================
+// CHARACTER SWITCH
+// ============================================================
+
+function switchCharacter() {
+
+    if (gameOver)
+        return;
+
+
+    const available =
+        getAvailableCharacters();
+
+
+    if (
+        available.length <= 1
+    )
+        return;
+
+
+    let index =
+        available.findIndex(
+            character =>
+                character.id ===
+                currentCharacterId
+        );
+
+
+    if (index >= 0)
+        available[index].ai = true;
+
+
+    index++;
+
+
+    if (
+        index >=
+        available.length
+    )
+        index = 0;
+
+
+    const next =
+        available[index];
+
+
+    currentCharacterId =
+        next.id;
+
+
+    next.ai = false;
+
+
+    createSwitchEffect(
+        next.x,
+        next.y
+    );
+
+}
+
+
+// ============================================================
+// GET CURRENT CHARACTER
+// ============================================================
+
+function getCurrentCharacter() {
+
+    if (
+        currentTeam ===
+        "human"
+    ) {
+
+        return humans.find(
+            human =>
+                human.id ===
+                currentCharacterId &&
+                human.alive &&
+                !human.infected
+        );
+
+    }
+
+
+    return zombies.find(
+        zombie =>
+            zombie.id ===
+            currentCharacterId &&
+            zombie.alive
+    );
+
+}
+
+
+function getAvailableCharacters() {
+
+    if (
+        currentTeam ===
+        "human"
+    ) {
+
+        return humans.filter(
+            human =>
+                human.alive &&
+                !human.infected
+        );
+
+    }
+
+
+    return zombies.filter(
+        zombie =>
+            zombie.alive
+    );
 
 }
 
@@ -1280,7 +1740,8 @@ function updateCamera() {
         getCurrentCharacter();
 
 
-    if (!player) return;
+    if (!player)
+        return;
 
 
     camera.x =
@@ -1317,14 +1778,12 @@ function updateCamera() {
 }
 
 
-// ============================================================
-// WORLD / SCREEN
-// ============================================================
-
-function screenToWorld(x, y) {
+function screenToWorld(
+    x,
+    y
+) {
 
     return {
-
         x:
             x +
             camera.x,
@@ -1332,16 +1791,17 @@ function screenToWorld(x, y) {
         y:
             y +
             camera.y
-
     };
 
 }
 
 
-function worldToScreen(x, y) {
+function worldToScreen(
+    x,
+    y
+) {
 
     return {
-
         x:
             x -
             camera.x,
@@ -1349,7 +1809,6 @@ function worldToScreen(x, y) {
         y:
             y -
             camera.y
-
     };
 
 }
@@ -1373,38 +1832,112 @@ function drawWorld() {
     );
 
 
-    const grid =
-        100;
+    drawRoads();
 
+    drawBuildings();
+
+    drawCars();
+
+}
+
+
+// ============================================================
+// ROADS
+// ============================================================
+
+function drawRoads() {
+
+    ctx.fillStyle =
+        "#252525";
+
+
+    // Horizontal roads
+
+    for (
+        let y = 850;
+        y < WORLD_HEIGHT;
+        y += 850
+    ) {
+
+        const screen =
+            worldToScreen(
+                0,
+                y
+            );
+
+
+        ctx.fillRect(
+            screen.x,
+            screen.y,
+            WORLD_WIDTH,
+            180
+        );
+
+    }
+
+
+    // Vertical roads
+
+    for (
+        let x = 850;
+        x < WORLD_WIDTH;
+        x += 850
+    ) {
+
+        const screen =
+            worldToScreen(
+                x,
+                0
+            );
+
+
+        ctx.fillRect(
+            screen.x,
+            screen.y,
+            180,
+            WORLD_HEIGHT
+        );
+
+    }
+
+
+    // Road markings
 
     ctx.strokeStyle =
-        "#263226";
+        "#c7b84a";
 
+    ctx.setLineDash([
+        30,
+        30
+    ]);
 
-    ctx.lineWidth = 1;
-
-
-    const offsetX =
-        -(camera.x % grid);
-
-
-    const offsetY =
-        -(camera.y % grid);
+    ctx.lineWidth = 3;
 
 
     for (
-        let x = offsetX;
-        x < canvas.width;
-        x += grid
+        let y = 940;
+        y < WORLD_HEIGHT;
+        y += 850
     ) {
+
+        const screen =
+            worldToScreen(
+                0,
+                y
+            );
+
 
         ctx.beginPath();
 
-        ctx.moveTo(x, 0);
+        ctx.moveTo(
+            screen.x,
+            screen.y
+        );
 
         ctx.lineTo(
-            x,
-            canvas.height
+            screen.x +
+            WORLD_WIDTH,
+            screen.y
         );
 
         ctx.stroke();
@@ -1412,22 +1945,184 @@ function drawWorld() {
     }
 
 
+    ctx.setLineDash([]);
+
+}
+
+
+// ============================================================
+// BUILDINGS
+// ============================================================
+
+function drawBuildings() {
+
     for (
-        let y = offsetY;
-        y < canvas.height;
-        y += grid
+        const building of buildings
     ) {
 
-        ctx.beginPath();
+        const p =
+            worldToScreen(
+                building.x,
+                building.y
+            );
 
-        ctx.moveTo(0, y);
 
-        ctx.lineTo(
-            canvas.width,
-            y
+        let wall =
+            "#777777";
+
+
+        let roof =
+            "#4c4c4c";
+
+
+        if (
+            building.type ===
+            "house"
+        ) {
+
+            wall =
+                "#b18a68";
+
+            roof =
+                "#704b3c";
+
+        }
+
+
+        if (
+            building.type ===
+            "shop"
+        ) {
+
+            wall =
+                "#768b92";
+
+            roof =
+                "#3e5056";
+
+        }
+
+
+        if (
+            building.type ===
+            "hospital"
+        ) {
+
+            wall =
+                "#d0d0d0";
+
+            roof =
+                "#707070";
+
+        }
+
+
+        if (
+            building.type ===
+            "police"
+        ) {
+
+            wall =
+                "#53677b";
+
+            roof =
+                "#293b4d";
+
+        }
+
+
+        // Shadow
+
+        ctx.fillStyle =
+            "rgba(0,0,0,0.35)";
+
+
+        ctx.fillRect(
+            p.x + 12,
+            p.y + 15,
+            building.width,
+            building.height
         );
 
-        ctx.stroke();
+
+        // Building body
+
+        ctx.fillStyle =
+            wall;
+
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            building.width,
+            building.height
+        );
+
+
+        // Roof
+
+        ctx.fillStyle =
+            roof;
+
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            building.width,
+            45
+        );
+
+
+        // Windows
+
+        drawWindows(
+            p.x,
+            p.y,
+            building
+        );
+
+
+        // Door
+
+        ctx.fillStyle =
+            "#38271e";
+
+
+        ctx.fillRect(
+            p.x +
+                building.width / 2 -
+                20,
+
+            p.y +
+                building.height -
+                65,
+
+            40,
+            65
+        );
+
+
+        // Building label
+
+        ctx.font =
+            "bold 14px Arial";
+
+        ctx.textAlign =
+            "center";
+
+        ctx.fillStyle =
+            "rgba(255,255,255,0.8)";
+
+
+        ctx.fillText(
+            building.name,
+            p.x +
+                building.width / 2,
+
+            p.y +
+                building.height +
+                20
+        );
 
     }
 
@@ -1435,10 +2130,203 @@ function drawWorld() {
 
 
 // ============================================================
-// DRAW HUMAN
+// WINDOWS
 // ============================================================
 
-function drawHuman(human) {
+function drawWindows(
+    x,
+    y,
+    building
+) {
+
+    const rows = 2;
+
+    const cols = 3;
+
+
+    for (
+        let row = 0;
+        row < rows;
+        row++
+    ) {
+
+        for (
+            let col = 0;
+            col < cols;
+            col++
+        ) {
+
+            const wx =
+                x +
+                55 +
+                col *
+                (
+                    (
+                        building.width -
+                        110
+                    ) /
+                    2
+                );
+
+
+            const wy =
+                y +
+                80 +
+                row *
+                85;
+
+
+            ctx.fillStyle =
+                "#182b35";
+
+
+            ctx.fillRect(
+                wx,
+                wy,
+                45,
+                45
+            );
+
+
+            ctx.strokeStyle =
+                "#c6c6a5";
+
+
+            ctx.lineWidth = 2;
+
+
+            ctx.strokeRect(
+                wx,
+                wy,
+                45,
+                45
+            );
+
+        }
+
+    }
+
+}
+
+
+// ============================================================
+// CARS
+// ============================================================
+
+function drawCars() {
+
+    for (
+        const car of cars
+    ) {
+
+        const p =
+            worldToScreen(
+                car.x,
+                car.y
+            );
+
+
+        ctx.fillStyle =
+            "#242a30";
+
+
+        ctx.fillRect(
+            p.x,
+            p.y,
+            car.width,
+            car.height
+        );
+
+
+        ctx.fillStyle =
+            "#1a2025";
+
+
+        ctx.fillRect(
+            p.x + 15,
+            p.y - 8,
+            45,
+            12
+        );
+
+
+        ctx.fillStyle =
+            "#111";
+
+
+        ctx.beginPath();
+
+        ctx.arc(
+            p.x + 18,
+            p.y + car.height,
+            9,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.arc(
+            p.x + 62,
+            p.y + car.height,
+            9,
+            0,
+            Math.PI * 2
+        );
+
+        ctx.fill();
+
+    }
+
+}
+
+
+// ============================================================
+// CHARACTER DRAWING
+// ============================================================
+
+function drawCharacters() {
+
+    for (
+        const human of humans
+    ) {
+
+        if (
+            !human.alive ||
+            human.infected
+        )
+            continue;
+
+
+        drawHuman(
+            human
+        );
+
+    }
+
+
+    for (
+        const zombie of zombies
+    ) {
+
+        if (!zombie.alive)
+            continue;
+
+
+        drawZombie(
+            zombie
+        );
+
+    }
+
+}
+
+
+// ============================================================
+// HUMAN
+// ============================================================
+
+function drawHuman(
+    human
+) {
 
     const p =
         worldToScreen(
@@ -1450,15 +2338,15 @@ function drawHuman(human) {
     // Shadow
 
     ctx.fillStyle =
-        "rgba(0,0,0,0.35)";
+        "rgba(0,0,0,0.4)";
 
 
     ctx.beginPath();
 
     ctx.ellipse(
         p.x,
-        p.y + 14,
-        20,
+        p.y + 19,
+        21,
         8,
         0,
         0,
@@ -1471,25 +2359,148 @@ function drawHuman(human) {
     // Body
 
     ctx.fillStyle =
-        human.id ===
-        currentCharacterId &&
-        currentTeam ===
-        "human"
-            ? "#49d9ff"
-            : "#eeeeee";
+        human.shirt;
+
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        p.x - 13,
+        p.y + 2,
+        26,
+        27,
+        8
+    );
+
+    ctx.fill();
+
+
+    // Neck
+
+    ctx.fillStyle =
+        human.skin;
+
+
+    ctx.fillRect(
+        p.x - 5,
+        p.y - 4,
+        10,
+        10
+    );
+
+
+    // Face
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,
+        p.y - 13,
+        14,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    // Hair
+
+    ctx.fillStyle =
+        human.hair;
 
 
     ctx.beginPath();
 
     ctx.arc(
         p.x,
-        p.y,
-        human.radius,
+        p.y - 18,
+        14,
+        Math.PI,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    // Hair side
+
+    ctx.fillRect(
+        p.x - 14,
+        p.y - 18,
+        5,
+        12
+    );
+
+
+    ctx.fillRect(
+        p.x + 9,
+        p.y - 18,
+        5,
+        12
+    );
+
+
+    // Eyes
+
+    ctx.fillStyle =
+        "#111";
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x - 5,
+        p.y - 12,
+        2,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.arc(
+        p.x + 5,
+        p.y - 12,
+        2,
         0,
         Math.PI * 2
     );
 
     ctx.fill();
+
+
+    // Nose
+
+    ctx.fillStyle =
+        "#9a654e";
+
+
+    ctx.fillRect(
+        p.x - 1,
+        p.y - 9,
+        2,
+        4
+    );
+
+
+    // Smile
+
+    ctx.strokeStyle =
+        "#592f2f";
+
+    ctx.lineWidth = 1;
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,
+        p.y - 7,
+        5,
+        0,
+        Math.PI
+    );
+
+    ctx.stroke();
 
 
     // Selection ring
@@ -1502,7 +2513,7 @@ function drawHuman(human) {
     ) {
 
         ctx.strokeStyle =
-            "#39d9ff";
+            "#35d9ff";
 
         ctx.lineWidth = 4;
 
@@ -1512,7 +2523,7 @@ function drawHuman(human) {
         ctx.arc(
             p.x,
             p.y,
-            human.radius + 9,
+            31,
             0,
             Math.PI * 2
         );
@@ -1524,14 +2535,14 @@ function drawHuman(human) {
 
     drawHealthBar(
         p.x,
-        p.y - 30,
+        p.y - 39,
         human
     );
 
 
     drawName(
         p.x,
-        p.y - 40,
+        p.y - 51,
         human.name
     );
 
@@ -1539,10 +2550,12 @@ function drawHuman(human) {
 
 
 // ============================================================
-// DRAW ZOMBIE
+// ZOMBIE
 // ============================================================
 
-function drawZombie(zombie) {
+function drawZombie(
+    zombie
+) {
 
     const p =
         worldToScreen(
@@ -1551,8 +2564,8 @@ function drawZombie(zombie) {
         );
 
 
-    let color =
-        "#6ce56a";
+    let shirt =
+        "#344b35";
 
 
     if (
@@ -1560,8 +2573,8 @@ function drawZombie(zombie) {
         "fast"
     ) {
 
-        color =
-            "#e5d65a";
+        shirt =
+            "#4f5d30";
 
     }
 
@@ -1571,62 +2584,156 @@ function drawZombie(zombie) {
         "tank"
     ) {
 
-        color =
-            "#a56be5";
+        shirt =
+            "#423d52";
 
     }
 
 
-    if (
-        zombie.id ===
-        currentCharacterId &&
-        currentTeam ===
-        "zombie"
-    ) {
-
-        color =
-            "#ff5555";
-
-    }
-
+    // Shadow
 
     ctx.fillStyle =
-        color;
+        "rgba(0,0,0,0.45)";
+
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        p.x,
+        p.y + 20,
+        zombie.radius + 5,
+        8,
+        0,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    // Body
+
+    ctx.fillStyle =
+        shirt;
+
+
+    ctx.beginPath();
+
+    ctx.roundRect(
+        p.x -
+            zombie.radius * 0.7,
+
+        p.y,
+
+        zombie.radius * 1.4,
+
+        zombie.radius * 1.4,
+
+        7
+    );
+
+    ctx.fill();
+
+
+    // Neck
+
+    ctx.fillStyle =
+        zombie.skin;
+
+
+    ctx.fillRect(
+        p.x - 6,
+        p.y - 7,
+        12,
+        10
+    );
+
+
+    // Face
+
+    ctx.beginPath();
+
+    ctx.arc(
+        p.x,
+        p.y - 18,
+        zombie.radius * 0.72,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fill();
+
+
+    // Messy hair
+
+    ctx.fillStyle =
+        "#20251b";
 
 
     ctx.beginPath();
 
     ctx.arc(
         p.x,
-        p.y,
-        zombie.radius,
-        0,
+        p.y - 23,
+        zombie.radius * 0.72,
+        Math.PI,
         Math.PI * 2
     );
 
     ctx.fill();
 
 
-    // Eyes
+    // Glowing eyes
 
     ctx.fillStyle =
-        "#ff2020";
+        "#ff3030";
 
 
     ctx.beginPath();
 
     ctx.arc(
-        p.x - 6,
-        p.y - 3,
+        p.x -
+            zombie.radius * 0.28,
+
+        p.y - 18,
+
         3,
+
         0,
         Math.PI * 2
     );
 
+
     ctx.arc(
-        p.x + 6,
-        p.y - 3,
+        p.x +
+            zombie.radius * 0.28,
+
+        p.y - 18,
+
         3,
+
+        0,
+        Math.PI * 2
+    );
+
+
+    ctx.fill();
+
+
+    // Zombie mouth
+
+    ctx.fillStyle =
+        "#281212";
+
+
+    ctx.beginPath();
+
+    ctx.ellipse(
+        p.x,
+        p.y - 8,
+        zombie.radius * 0.42,
+        zombie.radius * 0.28,
+        0,
         0,
         Math.PI * 2
     );
@@ -1634,7 +2741,50 @@ function drawZombie(zombie) {
     ctx.fill();
 
 
-    // Selection
+    // Teeth
+
+    ctx.fillStyle =
+        "#ded8b6";
+
+
+    for (
+        let i = -1;
+        i <= 1;
+        i++
+    ) {
+
+        ctx.fillRect(
+            p.x +
+                i * 5 -
+                2,
+
+            p.y - 12,
+
+            4,
+            5
+        );
+
+    }
+
+
+    // Blood
+
+    ctx.fillStyle =
+        "#8e2020";
+
+
+    ctx.fillRect(
+        p.x +
+            zombie.radius * 0.5,
+
+        p.y - 4,
+
+        3,
+        12
+    );
+
+
+    // Player selection
 
     if (
         zombie.id ===
@@ -1644,7 +2794,7 @@ function drawZombie(zombie) {
     ) {
 
         ctx.strokeStyle =
-            "#ff3333";
+            "#ff4141";
 
         ctx.lineWidth = 4;
 
@@ -1666,44 +2816,21 @@ function drawZombie(zombie) {
 
     drawHealthBar(
         p.x,
-        p.y - 35,
+        p.y -
+            zombie.radius -
+            13,
+
         zombie
     );
 
 
     drawName(
         p.x,
-        p.y - 45,
+        p.y -
+            zombie.radius -
+            23,
+
         zombie.name
-    );
-
-}
-
-
-// ============================================================
-// DRAW NAME
-// ============================================================
-
-function drawName(
-    x,
-    y,
-    name
-) {
-
-    ctx.font =
-        "12px Arial";
-
-    ctx.textAlign =
-        "center";
-
-    ctx.fillStyle =
-        "rgba(255,255,255,0.85)";
-
-
-    ctx.fillText(
-        name,
-        x,
-        y
     );
 
 }
@@ -1719,8 +2846,7 @@ function drawHealthBar(
     character
 ) {
 
-    const width = 45;
-
+    const width = 48;
     const height = 5;
 
 
@@ -1733,12 +2859,15 @@ function drawHealthBar(
 
 
     ctx.fillStyle =
-        "rgba(0,0,0,0.7)";
+        "#151515";
 
 
     ctx.fillRect(
-        x - width / 2,
+        x -
+            width / 2,
+
         y,
+
         width,
         height
     );
@@ -1746,13 +2875,16 @@ function drawHealthBar(
 
     ctx.fillStyle =
         ratio > 0.5
-            ? "#5ee56a"
-            : "#ff4141";
+            ? "#5ce36a"
+            : "#f04444";
 
 
     ctx.fillRect(
-        x - width / 2,
+        x -
+            width / 2,
+
         y,
+
         width * ratio,
         height
     );
@@ -1761,16 +2893,47 @@ function drawHealthBar(
 
 
 // ============================================================
-// DRAW BULLETS
+// NAME
+// ============================================================
+
+function drawName(
+    x,
+    y,
+    name
+) {
+
+    ctx.font =
+        "bold 12px Arial";
+
+    ctx.textAlign =
+        "center";
+
+    ctx.fillStyle =
+        "#ffffff";
+
+
+    ctx.fillText(
+        name,
+        x,
+        y
+    );
+
+}
+
+
+// ============================================================
+// BULLETS
 // ============================================================
 
 function drawBullets() {
 
     ctx.fillStyle =
-        "#ffd84a";
+        "#ffd447";
 
 
-    for (const bullet of bullets) {
+    for (
+        const bullet of bullets
+    ) {
 
         const p =
             worldToScreen(
@@ -1826,9 +2989,8 @@ function createBloodEffect(
 
         particles.push({
 
-            x: x,
-
-            y: y,
+            x,
+            y,
 
             vx:
                 Math.cos(angle) *
@@ -1840,7 +3002,7 @@ function createBloodEffect(
 
             life: 0.5,
 
-            color: color
+            color
 
         });
 
@@ -1868,9 +3030,8 @@ function createSwitchEffect(
 
         particles.push({
 
-            x: x,
-
-            y: y,
+            x,
+            y,
 
             vx:
                 Math.cos(angle) *
@@ -1892,9 +3053,13 @@ function createSwitchEffect(
 }
 
 
-function updateParticles(dt) {
+function updateParticles(
+    dt
+) {
 
-    for (const particle of particles) {
+    for (
+        const particle of particles
+    ) {
 
         particle.x +=
             particle.vx *
@@ -1912,8 +3077,8 @@ function updateParticles(dt) {
 
     particles =
         particles.filter(
-            p =>
-                p.life > 0
+            particle =>
+                particle.life > 0
         );
 
 }
@@ -1921,7 +3086,9 @@ function updateParticles(dt) {
 
 function drawParticles() {
 
-    for (const particle of particles) {
+    for (
+        const particle of particles
+    ) {
 
         const p =
             worldToScreen(
@@ -1962,24 +3129,25 @@ function drawParticles() {
 
 
 // ============================================================
-// FIND NEAREST HUMAN
+// FIND NEAREST
 // ============================================================
 
-function findNearestHuman(character) {
+function findNearestHuman(
+    character
+) {
 
     let nearest = null;
-
-    let closest =
-        Infinity;
+    let closest = Infinity;
 
 
-    for (const human of humans) {
+    for (
+        const human of humans
+    ) {
 
-        if (!human.alive)
-            continue;
-
-
-        if (human.infected)
+        if (
+            !human.alive ||
+            human.infected
+        )
             continue;
 
 
@@ -1991,12 +3159,10 @@ function findNearestHuman(character) {
 
 
         if (
-            d <
-            closest
+            d < closest
         ) {
 
             closest = d;
-
             nearest = human;
 
         }
@@ -2009,19 +3175,17 @@ function findNearestHuman(character) {
 }
 
 
-// ============================================================
-// FIND NEAREST ZOMBIE
-// ============================================================
-
-function findNearestZombie(character) {
+function findNearestZombie(
+    character
+) {
 
     let nearest = null;
-
-    let closest =
-        Infinity;
+    let closest = Infinity;
 
 
-    for (const zombie of zombies) {
+    for (
+        const zombie of zombies
+    ) {
 
         if (!zombie.alive)
             continue;
@@ -2035,12 +3199,10 @@ function findNearestZombie(character) {
 
 
         if (
-            d <
-            closest
+            d < closest
         ) {
 
             closest = d;
-
             nearest = zombie;
 
         }
@@ -2057,11 +3219,15 @@ function findNearestZombie(character) {
 // DISTANCE
 // ============================================================
 
-function distanceBetween(a, b) {
+function distanceBetween(
+    a,
+    b
+) {
 
     const dx =
         a.x -
         b.x;
+
 
     const dy =
         a.y -
@@ -2077,10 +3243,12 @@ function distanceBetween(a, b) {
 
 
 // ============================================================
-// WORLD BOUNDARY
+// WORLD LIMIT
 // ============================================================
 
-function keepInsideWorld(character) {
+function keepInsideWorld(
+    character
+) {
 
     character.x =
         Math.max(
@@ -2107,6 +3275,233 @@ function keepInsideWorld(character) {
 
 
 // ============================================================
+// HUD
+// ============================================================
+
+function updateHUD() {
+
+    const player =
+        getCurrentCharacter();
+
+
+    const mode =
+        document.getElementById(
+            "mode"
+        );
+
+    const character =
+        document.getElementById(
+            "character"
+        );
+
+    const health =
+        document.getElementById(
+            "health"
+        );
+
+    const humanCount =
+        document.getElementById(
+            "humans"
+        );
+
+    const zombieCount =
+        document.getElementById(
+            "zombies"
+        );
+
+
+    if (mode)
+        mode.textContent =
+            currentTeam.toUpperCase();
+
+
+    if (character)
+        character.textContent =
+            player
+                ? player.name
+                : "-";
+
+
+    if (health)
+        health.textContent =
+            player
+                ? Math.max(
+                    0,
+                    Math.floor(
+                        player.health
+                    )
+                )
+                : 0;
+
+
+    if (humanCount)
+        humanCount.textContent =
+            humans.filter(
+                h =>
+                    h.alive &&
+                    !h.infected
+            ).length;
+
+
+    if (zombieCount)
+        zombieCount.textContent =
+            zombies.filter(
+                z =>
+                    z.alive
+            ).length;
+
+}
+
+
+// ============================================================
+// INFECTION MESSAGE
+// ============================================================
+
+function showInfectionMessage() {
+
+    let warning =
+        document.getElementById(
+            "infectionWarning"
+        );
+
+
+    if (!warning) {
+
+        warning =
+            document.createElement(
+                "div"
+            );
+
+        warning.id =
+            "infectionWarning";
+
+
+        document.body.appendChild(
+            warning
+        );
+
+    }
+
+
+    warning.textContent =
+        "☠ YOU ARE INFECTED ☠";
+
+
+    warning.style.display =
+        "block";
+
+
+    setTimeout(
+        () => {
+
+            warning.style.display =
+                "none";
+
+        },
+        1800
+    );
+
+}
+
+
+// ============================================================
+// WAVE MESSAGE
+// ============================================================
+
+function showWaveMessage(
+    title,
+    subtitle
+) {
+
+    let box =
+        document.getElementById(
+            "waveMessage"
+        );
+
+
+    if (!box) {
+
+        box =
+            document.createElement(
+                "div"
+            );
+
+        box.id =
+            "waveMessage";
+
+
+        document.body.appendChild(
+            box
+        );
+
+    }
+
+
+    box.innerHTML = `
+        <div style="
+            font-size:42px;
+            font-weight:900;
+        ">
+            ${title}
+        </div>
+
+        <div style="
+            font-size:18px;
+            margin-top:8px;
+        ">
+            ${subtitle}
+        </div>
+    `;
+
+
+    box.style.position =
+        "fixed";
+
+    box.style.top =
+        "30%";
+
+    box.style.left =
+        "50%";
+
+    box.style.transform =
+        "translate(-50%,-50%)";
+
+    box.style.textAlign =
+        "center";
+
+    box.style.color =
+        "white";
+
+    box.style.background =
+        "rgba(0,0,0,0.75)";
+
+    box.style.padding =
+        "30px 55px";
+
+    box.style.borderRadius =
+        "15px";
+
+    box.style.zIndex =
+        "9999";
+
+    box.style.display =
+        "block";
+
+
+    setTimeout(
+        () => {
+
+            box.style.display =
+                "none";
+
+        },
+        2500
+    );
+
+}
+
+
+// ============================================================
 // GAME STATE
 // ============================================================
 
@@ -2114,20 +3509,11 @@ function checkGameState() {
 
     const livingHumans =
         humans.filter(
-            h =>
-                h.alive &&
-                !h.infected
+            human =>
+                human.alive &&
+                !human.infected
         );
 
-
-    const livingZombies =
-        zombies.filter(
-            z =>
-                z.alive
-        );
-
-
-    // ZOMBIES WIN
 
     if (
         livingHumans.length === 0
@@ -2142,53 +3528,14 @@ function checkGameState() {
     }
 
 
-    // HUMANS WIN
-
-    if (
-        livingZombies.length === 0
-    ) {
-
-        endGame(
-            "🧑 HUMANS WIN!"
-        );
-
-        return;
-
-    }
-
-
-    // Player died
-
-    if (
-        !getCurrentCharacter()
-    ) {
-
-        const available =
-            getAvailableCharacters();
-
-
-        if (
-            available.length > 0
-        ) {
-
-            currentCharacterId =
-                available[0].id;
-
-            available[0].ai =
-                false;
-
-        }
-
-    }
+    checkWaveFinished();
 
 }
 
 
-// ============================================================
-// END GAME
-// ============================================================
-
-function endGame(message) {
+function endGame(
+    message
+) {
 
     if (gameOver)
         return;
@@ -2209,120 +3556,107 @@ function endGame(message) {
         );
 
 
-    if (result) {
-
+    if (result)
         result.textContent =
             message;
 
-    }
 
-
-    if (messageBox) {
-
+    if (messageBox)
         messageBox.style.display =
             "flex";
 
-    }
-
 }
 
 
 // ============================================================
-// HUD
+// INPUT
 // ============================================================
 
-function updateHUD() {
+window.addEventListener(
+    "keydown",
+    event => {
 
-    const player =
-        getCurrentCharacter();
-
-
-    const mode =
-        document.getElementById(
-            "mode"
-        );
+        keys[
+            event.key.toLowerCase()
+        ] = true;
 
 
-    const character =
-        document.getElementById(
-            "character"
-        );
+        if (
+            event.key ===
+            "Tab"
+        ) {
+
+            event.preventDefault();
+
+            switchCharacter();
+
+        }
 
 
-    const health =
-        document.getElementById(
-            "health"
-        );
+        if (
+            event.key.toLowerCase()
+            === "r" &&
+            gameOver
+        ) {
 
+            location.reload();
 
-    const humanCount =
-        document.getElementById(
-            "humans"
-        );
-
-
-    const zombieCount =
-        document.getElementById(
-            "zombies"
-        );
-
-
-    if (mode) {
-
-        mode.textContent =
-            currentTeam.toUpperCase();
+        }
 
     }
+);
 
 
-    if (character) {
+window.addEventListener(
+    "keyup",
+    event => {
 
-        character.textContent =
-            player
-                ? player.name
-                : "-";
-
-    }
-
-
-    if (health) {
-
-        health.textContent =
-            player
-                ? Math.max(
-                    0,
-                    Math.floor(
-                        player.health
-                    )
-                )
-                : 0;
+        keys[
+            event.key.toLowerCase()
+        ] = false;
 
     }
+);
 
 
-    if (humanCount) {
+canvas.addEventListener(
+    "mousemove",
+    event => {
 
-        humanCount.textContent =
-            humans.filter(
-                h =>
-                    h.alive &&
-                    !h.infected
-            ).length;
+        mouse.x =
+            event.clientX;
 
-    }
-
-
-    if (zombieCount) {
-
-        zombieCount.textContent =
-            zombies.filter(
-                z =>
-                    z.alive
-            ).length;
+        mouse.y =
+            event.clientY;
 
     }
+);
 
-}
+
+canvas.addEventListener(
+    "mousedown",
+    event => {
+
+        if (
+            event.button === 0
+        )
+            mouse.down = true;
+
+    }
+);
+
+
+canvas.addEventListener(
+    "mouseup",
+    event => {
+
+        if (
+            event.button === 0
+        )
+            mouse.down = false;
+
+    }
+);
 
 
 // ============================================================
@@ -2333,13 +3667,16 @@ let previousTime =
     performance.now();
 
 
-function gameLoop(time) {
+function gameLoop(
+    time
+) {
 
     const dt =
         Math.min(
-            (time -
-                previousTime) /
-            1000,
+            (
+                time -
+                previousTime
+            ) / 1000,
             0.05
         );
 
@@ -2363,6 +3700,8 @@ function gameLoop(time) {
         updateBullets(dt);
 
         updateParticles(dt);
+
+        updateWaveTimer(dt);
 
         updateCamera();
 
@@ -2390,39 +3729,12 @@ function gameLoop(time) {
 
 
 // ============================================================
-// DRAW ALL CHARACTERS
-// ============================================================
-
-function drawCharacters() {
-
-    for (const human of humans) {
-
-        if (!human.alive)
-            continue;
-
-        if (human.infected)
-            continue;
-
-        drawHuman(human);
-
-    }
-
-
-    for (const zombie of zombies) {
-
-        if (!zombie.alive)
-            continue;
-
-        drawZombie(zombie);
-
-    }
-
-}
-
-
-// ============================================================
 // START
 // ============================================================
+
+createCity();
+
+createInitialHumans();
 
 requestAnimationFrame(
     gameLoop
