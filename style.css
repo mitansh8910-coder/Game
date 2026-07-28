@@ -1,0 +1,469 @@
+/* =========================================
+   INFECTION - GAME STYLES
+   ========================================= */
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: #0b0f0b;
+    color: #ffffff;
+    font-family: Arial, Helvetica, sans-serif;
+    user-select: none;
+}
+
+/* =========================================
+   GAME CANVAS
+   ========================================= */
+
+#game {
+    position: fixed;
+    inset: 0;
+
+    width: 100vw;
+    height: 100vh;
+
+    display: block;
+
+    background: #202820;
+    cursor: crosshair;
+}
+
+
+/* =========================================
+   HUD
+   ========================================= */
+
+#ui {
+    position: fixed;
+
+    top: 18px;
+    left: 18px;
+
+    min-width: 220px;
+
+    padding: 16px 18px;
+
+    background: rgba(8, 12, 9, 0.86);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    border-radius: 12px;
+
+    box-shadow:
+        0 8px 30px rgba(0, 0, 0, 0.45);
+
+    backdrop-filter: blur(8px);
+
+    z-index: 10;
+
+    font-size: 14px;
+
+    line-height: 1.7;
+}
+
+
+/* Game title */
+
+#ui b {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 20px;
+
+    letter-spacing: 2px;
+
+    color: #8cff6a;
+}
+
+
+/* HUD labels */
+
+#ui span {
+    font-weight: bold;
+}
+
+
+/* =========================================
+   GAME MODE
+   ========================================= */
+
+#mode {
+    color: #ffffff;
+}
+
+
+/* =========================================
+   HEALTH
+   ========================================= */
+
+#health {
+    color: #66ff66;
+}
+
+
+/* =========================================
+   HUMAN COUNT
+   ========================================= */
+
+#humans {
+    color: #72c7ff;
+}
+
+
+/* =========================================
+   ZOMBIE COUNT
+   ========================================= */
+
+#zombies {
+    color: #7dff6b;
+}
+
+
+/* =========================================
+   GAME OVER SCREEN
+   ========================================= */
+
+#message {
+    position: fixed;
+
+    inset: 0;
+
+    display: none;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    gap: 25px;
+
+    background:
+        radial-gradient(
+            circle,
+            rgba(20, 30, 20, 0.75),
+            rgba(0, 0, 0, 0.96)
+        );
+
+    z-index: 100;
+}
+
+
+/* =========================================
+   RESULT TEXT
+   ========================================= */
+
+#result {
+    font-size: clamp(42px, 7vw, 90px);
+
+    font-weight: 900;
+
+    text-align: center;
+
+    letter-spacing: 3px;
+
+    text-shadow:
+        0 0 10px rgba(255, 255, 255, 0.25),
+        0 0 30px rgba(0, 0, 0, 0.8);
+}
+
+
+/* =========================================
+   BUTTONS
+   ========================================= */
+
+button {
+    padding: 13px 28px;
+
+    border: none;
+
+    border-radius: 8px;
+
+    background: #8cff6a;
+
+    color: #081008;
+
+    font-size: 17px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition:
+        transform 0.15s ease,
+        filter 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+button:hover {
+    transform: translateY(-2px);
+
+    filter: brightness(1.1);
+
+    box-shadow:
+        0 6px 20px rgba(140, 255, 106, 0.25);
+}
+
+
+button:active {
+    transform: translateY(0);
+}
+
+
+/* =========================================
+   OPTIONAL MAIN MENU
+   ========================================= */
+
+#menu {
+    position: fixed;
+
+    inset: 0;
+
+    display: flex;
+
+    align-items: center;
+    justify-content: center;
+
+    flex-direction: column;
+
+    background:
+        linear-gradient(
+            rgba(0, 0, 0, 0.55),
+            rgba(0, 0, 0, 0.9)
+        );
+
+    z-index: 50;
+}
+
+
+/* =========================================
+   GAME TITLE
+   ========================================= */
+
+#title {
+    margin-bottom: 10px;
+
+    font-size: clamp(50px, 9vw, 110px);
+
+    font-weight: 900;
+
+    letter-spacing: 8px;
+
+    color: #8cff6a;
+
+    text-shadow:
+        0 0 10px rgba(140, 255, 106, 0.4),
+        0 0 40px rgba(0, 0, 0, 0.9);
+}
+
+
+#subtitle {
+    margin-bottom: 35px;
+
+    color: #b9b9b9;
+
+    font-size: 16px;
+
+    letter-spacing: 3px;
+}
+
+
+/* =========================================
+   CROSSHAIR
+   ========================================= */
+
+#crosshair {
+    position: fixed;
+
+    width: 20px;
+    height: 20px;
+
+    pointer-events: none;
+
+    z-index: 20;
+
+    transform: translate(-50%, -50%);
+}
+
+
+#crosshair::before,
+#crosshair::after {
+    content: "";
+
+    position: absolute;
+
+    background: rgba(255, 255, 255, 0.9);
+}
+
+
+#crosshair::before {
+    width: 2px;
+    height: 20px;
+
+    left: 9px;
+    top: 0;
+}
+
+
+#crosshair::after {
+    width: 20px;
+    height: 2px;
+
+    left: 0;
+    top: 9px;
+}
+
+
+/* =========================================
+   CHARACTER SWITCH INDICATOR
+   ========================================= */
+
+#switchIndicator {
+    position: fixed;
+
+    bottom: 25px;
+
+    left: 50%;
+
+    transform: translateX(-50%);
+
+    padding: 9px 18px;
+
+    background: rgba(0, 0, 0, 0.7);
+
+    border-radius: 20px;
+
+    color: #ffffff;
+
+    font-size: 13px;
+
+    letter-spacing: 1px;
+
+    pointer-events: none;
+
+    z-index: 10;
+}
+
+
+/* =========================================
+   INFECTION WARNING
+   ========================================= */
+
+#infectionWarning {
+    position: fixed;
+
+    top: 50%;
+
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    display: none;
+
+    color: #ff4444;
+
+    font-size: clamp(30px, 5vw, 70px);
+
+    font-weight: 900;
+
+    letter-spacing: 5px;
+
+    text-align: center;
+
+    pointer-events: none;
+
+    z-index: 30;
+
+    animation:
+        infectionPulse 0.7s infinite alternate;
+}
+
+
+@keyframes infectionPulse {
+
+    from {
+        opacity: 0.55;
+        transform: translate(-50%, -50%) scale(0.98);
+    }
+
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.04);
+    }
+
+}
+
+
+/* =========================================
+   DAMAGE FLASH
+   ========================================= */
+
+#damageFlash {
+    position: fixed;
+
+    inset: 0;
+
+    background: rgba(255, 0, 0, 0.25);
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    z-index: 40;
+
+    transition: opacity 0.08s;
+}
+
+
+/* =========================================
+   RESPONSIVE HUD
+   ========================================= */
+
+@media (max-width: 600px) {
+
+    #ui {
+        top: 10px;
+        left: 10px;
+
+        min-width: 180px;
+
+        padding: 10px 12px;
+
+        font-size: 12px;
+    }
+
+
+    #ui b {
+        font-size: 16px;
+    }
+
+
+    #switchIndicator {
+        bottom: 12px;
+
+        font-size: 11px;
+    }
+
+}
+
+
+/* =========================================
+   SCROLLBAR
+   ========================================= */
+
+::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
