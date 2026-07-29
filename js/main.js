@@ -1,76 +1,126 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js";
 
+// ---------------- Scene ----------------
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0x87CEEB);
 
-// Camera
+// ---------------- Camera ----------------
 const camera = new THREE.PerspectiveCamera(
     75,
-    window.innerWidth/window.innerHeight,
+    window.innerWidth / window.innerHeight,
     0.1,
     1000
 );
 
-camera.position.set(0,8,15);
-
-// Renderer
-const renderer = new THREE.WebGLRenderer({antialias:true});
-renderer.setSize(window.innerWidth,window.innerHeight);
-
+// ---------------- Renderer ----------------
+const renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById("game").appendChild(renderer.domElement);
 
-// Lights
-const light=new THREE.DirectionalLight(0xffffff,2);
-light.position.set(10,20,10);
-scene.add(light);
+// ---------------- Lights ----------------
+scene.add(new THREE.AmbientLight(0xffffff, 0.7));
 
-scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+sun.position.set(50, 100, 50);
+scene.add(sun);
 
-// Ground
-const ground=new THREE.Mesh(
-    new THREE.PlaneGeometry(200,200),
-    new THREE.MeshStandardMaterial({
-        color:0x3d8f3d
-    })
+// ---------------- Ground ----------------
+const ground = new THREE.Mesh(
+    new THREE.PlaneGeometry(300, 300),
+    new THREE.MeshStandardMaterial({ color: 0x228B22 })
 );
-
-ground.rotation.x=-Math.PI/2;
+ground.rotation.x = -Math.PI / 2;
 scene.add(ground);
 
-// Cube (test object)
-const cube=new THREE.Mesh(
-    new THREE.BoxGeometry(2,2,2),
-    new THREE.MeshStandardMaterial({
-        color:0xff4444
-    })
+// ---------------- Test Cube ----------------
+const cube = new THREE.Mesh(
+    new THREE.BoxGeometry(2, 2, 2),
+    new THREE.MeshStandardMaterial({ color: 0xff3333 })
 );
-
-cube.position.y=1;
-
+cube.position.set(0, 1, 0);
 scene.add(cube);
 
-// Resize
-window.addEventListener("resize",()=>{
+// ---------------- Player ----------------
+const player = {
+    x: 0,
+    y: 2,
+    z: 12,
+    rotation: 0,
+    speed: 0.18
+};
 
-    camera.aspect=window.innerWidth/window.innerHeight;
-    camera.updateProjectionMatrix();
+camera.position.set(player.x, player.y, player.z);
 
-    renderer.setSize(
-        window.innerWidth,
-        window.innerHeight
-    );
+// ---------------- Keyboard ----------------
+const keys = {};
 
+window.addEventListener("keydown", (e) => {
+    keys[e.key.toLowerCase()] = true;
 });
 
-// Animation
-function animate(){
+window.addEventListener("keyup", (e) => {
+    keys[e.key.toLowerCase()] = false;
+});
+
+// ---------------- Resize ----------------
+window.addEventListener("resize", () => {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// ---------------- Update ----------------
+function updatePlayer() {
+
+    // Rotate
+    if (keys["arrowleft"]) player.rotation += 0.03;
+    if (keys["arrowright"]) player.rotation -= 0.03;
+
+    camera.rotation.y = player.rotation;
+
+    const dx = Math.sin(player.rotation);
+    const dz = Math.cos(player.rotation);
+
+    // Move
+    if (keys["w"]) {
+        player.x -= dx * player.speed;
+        player.z -= dz * player.speed;
+    }
+
+    if (keys["s"]) {
+        player.x += dx * player.speed;
+        player.z += dz * player.speed;
+    }
+
+    if (keys["a"]) {
+        player.x -= dz * player.speed;
+        player.z += dx * player.speed;
+    }
+
+    if (keys["d"]) {
+        player.x += dz * player.speed;
+        player.z -= dx * player.speed;
+    }
+
+    camera.position.set(player.x, player.y, player.z);
+}
+
+// ---------------- Loop ----------------
+function animate() {
 
     requestAnimationFrame(animate);
 
-    cube.rotation.y+=0.01;
+    cube.rotation.y += 0.01;
 
-    renderer.render(scene,camera);
+    updatePlayer();
 
+    camera.lookAt(
+        player.x - Math.sin(player.rotation),
+        player.y,
+        player.z - Math.cos(player.rotation)
+    );
+
+    renderer.render(scene, camera);
 }
 
 animate();
