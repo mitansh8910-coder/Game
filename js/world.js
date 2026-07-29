@@ -2,52 +2,81 @@ import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.m
 
 export class World {
 
-    constructor(scene) {
+    constructor(scene){
 
         this.scene = scene;
 
-        this.createGround();
+        // ===== WORLD SETTINGS =====
+
+        this.tileSize = 20;
+        this.gridSize = 25; // 25x25 tiles
+
+        this.tiles = [];
+
+        // Materials
+
+        this.roadMaterial = new THREE.MeshStandardMaterial({
+            color:0x2e2e2e
+        });
+
+        this.sidewalkMaterial = new THREE.MeshStandardMaterial({
+            color:0xb5b5b5
+        });
+
+        this.grassMaterial = new THREE.MeshStandardMaterial({
+            color:0x4f9445
+        });
+
+        this.createSky();
         this.createLights();
-        this.createRoads();
-        this.createBuildings();
-        this.createTrees();
+        this.createGround();
+        this.generateGrid();
 
     }
 
-    createGround() {
+    //------------------------------------
+    // SKY
+    //------------------------------------
 
-        const ground = new THREE.Mesh(
+    createSky(){
 
-            new THREE.PlaneGeometry(1000,1000),
+        this.scene.background =
+            new THREE.Color(0x87CEEB);
 
-            new THREE.MeshStandardMaterial({
-                color:0x4c9a42
-            })
-
-        );
-
-        ground.rotation.x = -Math.PI/2;
-        ground.receiveShadow = true;
-
-        this.scene.add(ground);
+        this.scene.fog =
+            new THREE.Fog(
+                0x87CEEB,
+                180,
+                520
+            );
 
     }
+
+    //------------------------------------
+    // LIGHTS
+    //------------------------------------
 
     createLights(){
 
-        const ambient = new THREE.AmbientLight(
-            0xffffff,
-            0.55
-        );
+        const ambient =
+            new THREE.AmbientLight(
+                0xffffff,
+                0.65
+            );
 
         this.scene.add(ambient);
 
-        const sun = new THREE.DirectionalLight(
-            0xffffff,
-            1.3
-        );
+        const sun =
+            new THREE.DirectionalLight(
+                0xffffff,
+                1.2
+            );
 
-        sun.position.set(100,200,100);
+        sun.position.set(
+            150,
+            250,
+            100
+        );
 
         sun.castShadow = true;
 
@@ -55,147 +84,142 @@ export class World {
 
     }
 
-    createRoads(){
+    //------------------------------------
+    // GROUND
+    //------------------------------------
 
-        const roadMaterial = new THREE.MeshStandardMaterial({
-            color:0x333333
-        });
+    createGround(){
 
-        for(let i=-400;i<=400;i+=120){
+        const ground =
+            new THREE.Mesh(
 
-            const road1 = new THREE.Mesh(
-
-                new THREE.BoxGeometry(
-                    1000,
-                    0.05,
-                    18
+                new THREE.PlaneGeometry(
+                    this.gridSize*this.tileSize,
+                    this.gridSize*this.tileSize
                 ),
 
-                roadMaterial
+                this.grassMaterial
 
             );
 
-            road1.position.z=i;
+        ground.rotation.x = -Math.PI/2;
 
-            this.scene.add(road1);
+        ground.receiveShadow = true;
 
-            const road2 = new THREE.Mesh(
+        this.scene.add(ground);
 
-                new THREE.BoxGeometry(
-                    18,
-                    0.05,
-                    1000
-                ),
+    }
 
-                roadMaterial
+    //------------------------------------
+    // TILE GRID
+    //------------------------------------
 
-            );
+    generateGrid(){
 
-            road2.position.x=i;
+        const half = this.gridSize/2;
 
-            this.scene.add(road2);
+        for(let x=0;x<this.gridSize;x++){
+
+            for(let z=0;z<this.gridSize;z++){
+
+                const worldX =
+                    (x-half)*this.tileSize+
+                    this.tileSize/2;
+
+                const worldZ =
+                    (z-half)*this.tileSize+
+                    this.tileSize/2;
+
+                // Every 5th row/column becomes a road
+
+                const road =
+                    x%5===0 ||
+                    z%5===0;
+
+                if(road){
+
+                    this.createRoadTile(
+                        worldX,
+                        worldZ
+                    );
+
+                    this.tiles.push({
+                        x:worldX,
+                        z:worldZ,
+                        type:"road"
+                    });
+
+                }
+                else{
+
+                    this.tiles.push({
+                        x:worldX,
+                        z:worldZ,
+                        type:"empty"
+                    });
+
+                }
+
+            }
 
         }
 
     }
 
-    createBuildings(){
+    //------------------------------------
+    // ROAD TILE
+    //------------------------------------
 
-        const colors=[
-            0x888888,
-            0x666666,
-            0x999999,
-            0x777777
-        ];
+    createRoadTile(x,z){
 
-        for(let i=0;i<120;i++){
-
-            const w=10+Math.random()*18;
-            const h=10+Math.random()*45;
-            const d=10+Math.random()*18;
-
-            const building=new THREE.Mesh(
+        const road =
+            new THREE.Mesh(
 
                 new THREE.BoxGeometry(
-                    w,
-                    h,
-                    d
+                    this.tileSize,
+                    0.08,
+                    this.tileSize
                 ),
 
-                new THREE.MeshStandardMaterial({
-                    color:colors[
-                        Math.floor(Math.random()*colors.length)
-                    ]
-                })
+                this.roadMaterial
 
             );
 
-            building.position.set(
+        road.position.set(
+            x,
+            0.04,
+            z
+        );
 
-                (Math.random()-0.5)*900,
+        this.scene.add(road);
 
-                h/2,
+        // lane markings
 
-                (Math.random()-0.5)*900
+        const markMaterial =
+            new THREE.MeshBasicMaterial({
+                color:0xffff66
+            });
 
-            );
+        const mark =
+            new THREE.Mesh(
 
-            this.scene.add(building);
-
-        }
-
-    }
-
-    createTrees(){
-
-        for(let i=0;i<250;i++){
-
-            const trunk=new THREE.Mesh(
-
-                new THREE.CylinderGeometry(
-                    0.5,
-                    0.7,
-                    4
+                new THREE.BoxGeometry(
+                    0.4,
+                    0.09,
+                    this.tileSize*0.45
                 ),
 
-                new THREE.MeshStandardMaterial({
-                    color:0x6b4423
-                })
+                markMaterial
 
             );
 
-            trunk.position.set(
+        mark.position.set(
+            x,
+            0.09,
+            z
+        );
 
-                (Math.random()-0.5)*950,
-
-                2,
-
-                (Math.random()-0.5)*950
-
-            );
-
-            this.scene.add(trunk);
-
-            const leaves=new THREE.Mesh(
-
-                new THREE.SphereGeometry(
-                    2.5,
-                    12,
-                    12
-                ),
-
-                new THREE.MeshStandardMaterial({
-                    color:0x228b22
-                })
-
-            );
-
-            leaves.position.copy(trunk.position);
-            leaves.position.y=5;
-
-            this.scene.add(leaves);
-
-        }
+        this.scene.add(mark);
 
     }
 
