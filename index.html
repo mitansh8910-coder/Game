@@ -1,438 +1,100 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infection: Last Stand 3D</title>
 
-```
-<meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
->
-
-<title>Infection: Last Stand 3D</title>
-
-<link rel="stylesheet" href="style.css">
-```
-
+    <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-```
-<!-- =====================================================
-     3D GAME
-====================================================== -->
-
-<div id="game-container"></div>
-
-
-<!-- =====================================================
-     CROSSHAIR
-====================================================== -->
-
-<div id="crosshair">
-    <span></span>
-    <span></span>
-    <span></span>
-    <span></span>
-</div>
-
-
-<!-- =====================================================
-     HUD
-====================================================== -->
-
-<div id="hud">
-
-    <div id="game-title">
-        ☣ INFECTION: LAST STAND
-    </div>
-
-    <div class="hud-section">
-
-        <div class="hud-row">
-            <span>MODE</span>
-            <strong id="mode">
-                HUMAN
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>CHARACTER</span>
-            <strong id="character">
-                Alex
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>❤️ HEALTH</span>
-            <strong id="health">
-                280
-            </strong>
-        </div>
-
-        <div class="bar">
-            <div
-                id="health-bar"
-                class="bar-fill health-fill"
-            ></div>
-        </div>
-
-    </div>
-
-
-    <div class="hud-section">
-
-        <div class="hud-row">
-            <span>👥 HUMANS</span>
-            <strong id="humans">
-                10
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>🧟 ZOMBIES</span>
-            <strong id="zombies">
-                0
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>🌊 WAVE</span>
-            <strong id="wave">
-                1 / 5
-            </strong>
-        </div>
-
-    </div>
-
-
-    <div
-        id="human-stats"
-        class="hud-section"
-    >
-
-        <div class="hud-row">
-            <span>🔫 AMMO</span>
-            <strong id="ammo">
-                30 / 30
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>💉 MEDKITS</span>
-            <strong id="medkits">
-                2
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>⚡ SPRINT</span>
-            <strong id="sprint">
-                100%
-            </strong>
-        </div>
-
-        <div class="bar">
-            <div
-                id="sprint-bar"
-                class="bar-fill sprint-fill"
-            ></div>
-        </div>
-
-    </div>
-
-
-    <div
-        id="zombie-stats"
-        class="hud-section hidden"
-    >
-
-        <div class="hud-row">
-            <span>☣ INFECTIONS</span>
-            <strong id="infections">
-                0
-            </strong>
-        </div>
-
-        <div class="hud-row">
-            <span>🧠 CONTROL</span>
-            <strong>
-                ZOMBIE
-            </strong>
-        </div>
-
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     WAVE ANNOUNCEMENT
-====================================================== -->
-
-<div
-    id="wave-announcement"
-    class="announcement hidden"
->
-
-    <div
-        id="wave-number"
-        class="announcement-title"
-    >
-        WAVE 1
-    </div>
-
-    <div
-        id="wave-text"
-        class="announcement-text"
-    >
-        18 ZOMBIES ARE COMING
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     INFECTION WARNING
-====================================================== -->
-
-<div
-    id="infection-warning"
-    class="infection-warning hidden"
->
-
-    <div class="infection-title">
-        ☣ YOU ARE INFECTED
-    </div>
-
-    <div class="infection-subtitle">
-        You can now control the zombie.
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     CONTROLS
-====================================================== -->
-
-<div id="controls">
-
-    <div class="controls-title">
-        CONTROLS
-    </div>
-
-    <div>
-        <kbd>W</kbd>
-        <kbd>A</kbd>
-        <kbd>S</kbd>
-        <kbd>D</kbd>
-        Move
-    </div>
-
-    <div>
-        <kbd>SHIFT</kbd>
-        Sprint
-    </div>
-
-    <div>
-        <kbd>MOUSE</kbd>
-        Aim
-    </div>
-
-    <div>
-        <kbd>LMB</kbd>
-        Shoot / Attack
-    </div>
-
-    <div>
-        <kbd>TAB</kbd>
-        Switch Character
-    </div>
-
-    <div>
-        <kbd>E</kbd>
-        Medkit
-    </div>
-
-    <div>
-        <kbd>R</kbd>
-        Reload
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     CHARACTER SWITCH INDICATOR
-====================================================== -->
-
-<div
-    id="switch-indicator"
-    class="switch-indicator hidden"
->
-
-    <div class="switch-title">
-        CHARACTER SWITCH
-    </div>
-
-    <div id="switch-name">
-        Alex
-    </div>
-
-    <div class="switch-help">
-        Press TAB to switch
-    </div>
-
-</div>
-
-
-<!-- =====================================================
-     GAME START SCREEN
-====================================================== -->
-
-<div id="start-screen">
-
-    <div class="start-box">
-
-        <div class="start-logo">
-            ☣
-        </div>
-
-        <h1>
-            INFECTION
-        </h1>
-
-        <h2>
-            LAST STAND
-        </h2>
-
-        <p>
-            A 3D zombie survival game
-        </p>
-
-        <div class="game-rules">
-
-            <div>
-                🧑 Survive as a human
+    <!-- Game Container -->
+    <div id="game-container"></div>
+
+    <!-- HUD -->
+    <div id="hud">
+        <div class="hud-box">
+            <h2>INFECTION: LAST STAND</h2>
+
+            <div class="stat">
+                ❤️ Health:
+                <span id="health">100</span>
             </div>
 
-            <div>
-                ☣ Become infected
+            <div class="stat">
+                🌊 Wave:
+                <span id="wave">1</span>
             </div>
 
-            <div>
-                🧟 Control zombies
+            <div class="stat">
+                🧟 Zombies:
+                <span id="zombies">0</span>
             </div>
 
-            <div>
-                🔄 Switch between survivors
+            <div class="stat">
+                👥 Humans:
+                <span id="humans">0</span>
             </div>
 
+            <div class="stat">
+                🔫 Ammo:
+                <span id="ammo">∞</span>
+            </div>
+
+            <div class="stat">
+                🎯 Character:
+                <span id="character">Human</span>
+            </div>
         </div>
-
-        <button id="start-button">
-            START GAME
-        </button>
-
-        <div class="start-note">
-            Click START and then click the game
-            to capture the mouse.
-        </div>
-
     </div>
 
-</div>
-
-
-<!-- =====================================================
-     GAME OVER / WIN SCREEN
-====================================================== -->
-
-<div
-    id="game-over"
-    class="game-over hidden"
->
-
-    <div class="result-box">
-
-        <div
-            id="result-icon"
-            class="result-icon"
-        >
-            ☠
-        </div>
-
-        <div
-            id="result-title"
-            class="result-title"
-        >
-            GAME OVER
-        </div>
-
-        <div
-            id="result-description"
-            class="result-description"
-        >
-            The survivors have fallen.
-        </div>
-
-        <button id="restart-button">
-            PLAY AGAIN
-        </button>
-
+    <!-- Crosshair -->
+    <div id="crosshair">
+        <div class="horizontal"></div>
+        <div class="vertical"></div>
     </div>
 
-</div>
+    <!-- Start Screen -->
+    <div id="start-screen">
+        <div class="menu">
+            <h1>INFECTION</h1>
+            <h2>LAST STAND</h2>
 
+            <p>
+                Survive zombie waves or become infected and
+                take control of the undead.
+            </p>
 
-<!-- =====================================================
-     LOADING SCREEN
-====================================================== -->
+            <button id="startButton">
+                START GAME
+            </button>
 
-<div id="loading-screen">
-
-    <div class="loading-box">
-
-        <div class="loading-title">
-            LOADING CITY...
+            <div class="controls">
+                <p>W A S D — Move</p>
+                <p>Mouse — Look Around</p>
+                <p>Left Click — Shoot / Attack</p>
+                <p>Shift — Sprint</p>
+                <p>E — Switch Controlled Character</p>
+            </div>
         </div>
-
-        <div class="loading-bar">
-
-            <div
-                id="loading-progress"
-                class="loading-progress"
-            ></div>
-
-        </div>
-
-        <div id="loading-text">
-            Preparing infection...
-        </div>
-
     </div>
 
-</div>
+    <!-- Game Over -->
+    <div id="game-over" style="display:none;">
+        <div class="menu">
+            <h1 id="gameOverTitle">GAME OVER</h1>
 
+            <p id="gameOverText"></p>
 
-<!-- =====================================================
-     THREE.JS
-====================================================== -->
+            <button onclick="location.reload()">
+                PLAY AGAIN
+            </button>
+        </div>
+    </div>
 
-<script
-    src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"
-></script>
-
-
-<!-- =====================================================
-     GAME JAVASCRIPT
-====================================================== -->
-
-<script src="game.js"></script>
-```
+    <!-- Load Game -->
+    <script type="module" src="./game.js"></script>
 
 </body>
 </html>
