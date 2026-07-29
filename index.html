@@ -9,92 +9,9 @@
 </head>
 <body>
 
-    <!-- Game Container -->
-    <div id="game-container"></div>
+    <div id="game"></div>
 
-    <!-- HUD -->
-    <div id="hud">
-        <div class="hud-box">
-            <h2>INFECTION: LAST STAND</h2>
-
-            <div class="stat">
-                ❤️ Health:
-                <span id="health">100</span>
-            </div>
-
-            <div class="stat">
-                🌊 Wave:
-                <span id="wave">1</span>
-            </div>
-
-            <div class="stat">
-                🧟 Zombies:
-                <span id="zombies">0</span>
-            </div>
-
-            <div class="stat">
-                👥 Humans:
-                <span id="humans">0</span>
-            </div>
-
-            <div class="stat">
-                🔫 Ammo:
-                <span id="ammo">∞</span>
-            </div>
-
-            <div class="stat">
-                🎯 Character:
-                <span id="character">Human</span>
-            </div>
-        </div>
-    </div>
-
-    <!-- Crosshair -->
-    <div id="crosshair">
-        <div class="horizontal"></div>
-        <div class="vertical"></div>
-    </div>
-
-    <!-- Start Screen -->
-    <div id="start-screen">
-        <div class="menu">
-            <h1>INFECTION</h1>
-            <h2>LAST STAND</h2>
-
-            <p>
-                Survive zombie waves or become infected and
-                take control of the undead.
-            </p>
-
-            <button id="startButton">
-                START GAME
-            </button>
-
-            <div class="controls">
-                <p>W A S D — Move</p>
-                <p>Mouse — Look Around</p>
-                <p>Left Click — Shoot / Attack</p>
-                <p>Shift — Sprint</p>
-                <p>E — Switch Controlled Character</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Game Over -->
-    <div id="game-over" style="display:none;">
-        <div class="menu">
-            <h1 id="gameOverTitle">GAME OVER</h1>
-
-            <p id="gameOverText"></p>
-
-            <button onclick="location.reload()">
-                PLAY AGAIN
-            </button>
-        </div>
-    </div>
-
-    <!-- Load Game -->
-    <script type="module" src="./game.js"></script>
+    <script type="module" src="./js/main.js"></script>
 
 </body>
 </html>
