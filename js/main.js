@@ -1,10 +1,17 @@
 import * as THREE from "https://cdn.jsdelivr.net/npm/three@0.176.0/build/three.module.js";
+import { Player } from "./player.js";
 
-// ---------------- Scene ----------------
+// ==========================
+// Scene
+// ==========================
+
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x87CEEB);
+scene.background = new THREE.Color(0x87ceeb);
 
-// ---------------- Camera ----------------
+// ==========================
+// Camera
+// ==========================
+
 const camera = new THREE.PerspectiveCamera(
     75,
     window.innerWidth / window.innerHeight,
@@ -12,115 +19,123 @@ const camera = new THREE.PerspectiveCamera(
     1000
 );
 
-// ---------------- Renderer ----------------
-const renderer = new THREE.WebGLRenderer({ antialias: true });
+// ==========================
+// Renderer
+// ==========================
+
+const renderer = new THREE.WebGLRenderer({
+    antialias: true
+});
+
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(window.devicePixelRatio);
+
 document.getElementById("game").appendChild(renderer.domElement);
 
-// ---------------- Lights ----------------
-scene.add(new THREE.AmbientLight(0xffffff, 0.7));
+// ==========================
+// Lights
+// ==========================
 
+// Ambient light
+scene.add(
+    new THREE.AmbientLight(0xffffff, 0.6)
+);
+
+// Sun
 const sun = new THREE.DirectionalLight(0xffffff, 1.5);
-sun.position.set(50, 100, 50);
+sun.position.set(40, 60, 30);
 scene.add(sun);
 
-// ---------------- Ground ----------------
+// ==========================
+// Ground
+// ==========================
+
 const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(300, 300),
-    new THREE.MeshStandardMaterial({ color: 0x228B22 })
+
+    new THREE.PlaneGeometry(500, 500),
+
+    new THREE.MeshStandardMaterial({
+        color: 0x3e8f3e
+    })
+
 );
+
 ground.rotation.x = -Math.PI / 2;
+ground.receiveShadow = true;
+
 scene.add(ground);
 
-// ---------------- Test Cube ----------------
+// ==========================
+// Test Cube
+// ==========================
+
 const cube = new THREE.Mesh(
+
     new THREE.BoxGeometry(2, 2, 2),
-    new THREE.MeshStandardMaterial({ color: 0xff3333 })
+
+    new THREE.MeshStandardMaterial({
+        color: 0xff4444
+    })
+
 );
+
 cube.position.set(0, 1, 0);
+
 scene.add(cube);
 
-// ---------------- Player ----------------
-const player = {
-    x: 0,
-    y: 2,
-    z: 12,
-    rotation: 0,
-    speed: 0.18
-};
+// ==========================
+// Grid (temporary)
+// ==========================
 
-camera.position.set(player.x, player.y, player.z);
+const grid = new THREE.GridHelper(
+    500,
+    100,
+    0x222222,
+    0x555555
+);
 
-// ---------------- Keyboard ----------------
-const keys = {};
+scene.add(grid);
 
-window.addEventListener("keydown", (e) => {
-    keys[e.key.toLowerCase()] = true;
-});
+// ==========================
+// Player
+// ==========================
 
-window.addEventListener("keyup", (e) => {
-    keys[e.key.toLowerCase()] = false;
-});
+const player = new Player(camera);
 
-// ---------------- Resize ----------------
+// ==========================
+// Resize
+// ==========================
+
 window.addEventListener("resize", () => {
+
     camera.aspect = window.innerWidth / window.innerHeight;
     camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
+
+    renderer.setSize(
+        window.innerWidth,
+        window.innerHeight
+    );
+
 });
 
-// ---------------- Update ----------------
-function updatePlayer() {
+// ==========================
+// Animation Loop
+// ==========================
 
-    // Rotate
-    if (keys["arrowleft"]) player.rotation += 0.03;
-    if (keys["arrowright"]) player.rotation -= 0.03;
+const clock = new THREE.Clock();
 
-    camera.rotation.y = player.rotation;
-
-    const dx = Math.sin(player.rotation);
-    const dz = Math.cos(player.rotation);
-
-    // Move
-    if (keys["w"]) {
-        player.x -= dx * player.speed;
-        player.z -= dz * player.speed;
-    }
-
-    if (keys["s"]) {
-        player.x += dx * player.speed;
-        player.z += dz * player.speed;
-    }
-
-    if (keys["a"]) {
-        player.x -= dz * player.speed;
-        player.z += dx * player.speed;
-    }
-
-    if (keys["d"]) {
-        player.x += dz * player.speed;
-        player.z -= dx * player.speed;
-    }
-
-    camera.position.set(player.x, player.y, player.z);
-}
-
-// ---------------- Loop ----------------
 function animate() {
 
     requestAnimationFrame(animate);
 
-    cube.rotation.y += 0.01;
+    const delta = clock.getDelta();
 
-    updatePlayer();
+    player.update(delta);
 
-    camera.lookAt(
-        player.x - Math.sin(player.rotation),
-        player.y,
-        player.z - Math.cos(player.rotation)
-    );
+    cube.rotation.y += delta;
 
     renderer.render(scene, camera);
+
 }
 
 animate();
